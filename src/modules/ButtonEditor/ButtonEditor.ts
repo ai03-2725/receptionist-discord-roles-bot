@@ -72,7 +72,7 @@ export class ButtonEditor extends SpecializedCommandModule {
           .setDescription("Sets the container color of the button message. Leave empty to disable container mode.")
           .addStringOption(option => option
             .setName("color")
-            .setDescription("The container color.")
+            .setDescription("The container color hex code.")
             .setRequired(false)
           )
         )
