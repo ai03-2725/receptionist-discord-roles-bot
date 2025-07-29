@@ -2,23 +2,16 @@ import {
   Client,
   Events,
   GatewayIntentBits,
-  REST,
-  Routes,
   SharedSlashCommand,
-  type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
-import dotenv from 'dotenv';
-import hash from 'object-hash';
 import {
-  readFileSync,
   existsSync,
-  mkdirSync
 } from 'fs';
 import Database from 'better-sqlite3';
 
 import type { CommandModule, Module } from "./structures/BaseModules";
 import { PingHandler } from "./modules/PingHandler/PingHandler";
-import { createBotDataDirIfNecessary, CURRENT_BOT_CONFIG_VERSION, DEFAULT_DATA_JSON, loadBotDataJson, updateBotDataJson, type BotDataJson } from "./core/BotData";
+import { createBotDataDirIfNecessary, loadBotDataJson } from "./core/BotData";
 import { ButtonEditor } from "./modules/ButtonEditor/ButtonEditor";
 import { ButtonHandler } from "./modules/ButtonHandler/ButtonHandler";
 import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
