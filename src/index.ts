@@ -17,7 +17,7 @@ import { ButtonHandler } from "./modules/ButtonHandler/ButtonHandler";
 import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
 import { getAppToken, loadEnvVars } from "./core/EnvVars";
 import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
-import { logDebug, logInfo, LogLevel, logWarn } from "./core/Log";
+import { logDebug, logError, logInfo, LogLevel, logWarn } from "./core/Log";
 
 // Load environment variables
 loadEnvVars()
@@ -79,4 +79,10 @@ client.once(Events.ClientReady, async readyClient => {
 });
 
 // Log in to Discord
-client.login(getAppToken());
+try {
+  client.login(getAppToken());
+} catch (error) {
+  logError("Bot could not log into Discord.");
+  logError("Please verify that you have completed the Discord application setup and that all credentials are valid.");
+  process.exit(1);
+}
