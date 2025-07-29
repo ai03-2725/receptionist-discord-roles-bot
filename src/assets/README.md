@@ -1,0 +1,2 @@
+The bot icon is the `surrogate-key-flat-file` icon from [Material Design Icons](https://github.com/Templarian/MaterialDesign) licensed under the Apache 2.0 license.  
+If supplying your own icon, place it in `./data/custom-bot-icon.png`.
