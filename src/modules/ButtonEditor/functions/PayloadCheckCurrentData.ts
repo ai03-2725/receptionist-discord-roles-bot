@@ -13,7 +13,7 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
     checksPassed = false
   }
 
-  let buttonsString = "**Buttons:**";
+  let buttonsString = "";
   if (userData.buttons.length == 0) {
     buttonsString += "\n\nNone. Please supply at least one with `/buttoneditor addbutton`."
   }
@@ -33,10 +33,19 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
     )
     .addTextDisplayComponents(
       textDisplay => textDisplay
-        .setContent(`**Container Color:**\n${userData.containerColor
+        .setContent(`**Container Color:**`),
+      textDisplay => textDisplay
+        .setContent(`${userData.containerColor
           ? `0x${userData.containerColor} (currently displayed to the left)`
           : `None (message will be sent as regular text rather than in a container box like this current message)`
-          }\n\n**Body Text:** \n`),
+          }`)
+    )
+    .addSeparatorComponents(
+      separator => separator,
+    )
+    .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent(`\n\n**Body Text:**`),
       textDisplay => textDisplay
         .setContent(userData.body ? userData.body : "Missing. Please supply with `/buttoneditor bodytext`.")
     )
@@ -44,6 +53,8 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
       separator => separator,
     )
     .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent("**Buttons:**"),
       textDisplay => textDisplay
         .setContent(buttonsString)
     )

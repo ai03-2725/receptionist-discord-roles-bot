@@ -1,12 +1,18 @@
-import { MessageFlags, type ButtonInteraction, type CacheType } from "discord.js"
+import { ContainerBuilder, MessageFlags, type ButtonInteraction, type CacheType } from "discord.js"
 import { EndInteractionSilently } from "./EndInteractionSilently"
-import { interactionReplySafely } from "../../../util/InteractionReplySafely"
+import { interactionReplySafely, interactionReplySafelyComponents } from "../../../util/InteractionReplySafely"
 
 
 export const ConditionallyReply = async (interaction: ButtonInteraction<CacheType>, message: string, silent: boolean) => {
   if (silent) {
     EndInteractionSilently(interaction)
   } else {
-    await interactionReplySafely(interaction, message)
+    const replyContainer = new ContainerBuilder()
+    .setAccentColor(0x808080)
+    .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent(message)
+    )
+    await interactionReplySafelyComponents(interaction, [replyContainer])
   }
 }
