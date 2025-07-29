@@ -1,7 +1,7 @@
-import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
-import { isValidHex } from "../../../util/IsValidHex";
+import { ContainerBuilder, MessageFlags, type ChatInputCommandInteraction } from "discord.js";
+import { sanitizeHex } from "../../../util/SanitizeHex";
 import { type EditorDataType, initUserDataIfNecessary } from "./Common";
-import { interactionReplySafely } from "../../../util/InteractionReplySafely";
+import { interactionReplySafely, interactionReplySafelyComponents } from "../../../util/InteractionReplySafely";
 
 
 // Set the container color of the message being edited
@@ -10,10 +10,26 @@ export const setContainerColor = async (editorData: EditorDataType, interaction:
   initUserDataIfNecessary(editorData, interaction.user.id)
   const userData = editorData.get(interaction.user.id)!
   const containerColor = interaction.options.getString('color');
-  if (!containerColor || isValidHex(containerColor)) {
-    userData.containerColor = containerColor || undefined;
-    await interactionReplySafely(interaction, `${containerColor ? "Updated" : "Removed"} the button message's container color.`);
-  } else {
-    await interactionReplySafely(interaction, `Invalid container color hex code. Please provide a 6-char hex value without the preceding #.`);
+  if (!containerColor) {
+    await interactionReplySafely(interaction, "Removed the button message's container color and disabled container visibility.");
+    return
   }
+  const sanitizedColor = sanitizeHex(containerColor)
+  if (!sanitizedColor) {
+    await interactionReplySafely(interaction, `Invalid color "\`${containerColor}\`".\nPlease provide a hex color code.`)
+    return
+  }
+  userData.containerColor = sanitizedColor;
+
+  const replyContainer = new ContainerBuilder()
+    .setAccentColor(Number('0x' + sanitizedColor))
+    .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent(`Container color set to "\`${containerColor}\`" (displayed on this message's container).`),
+      textDisplay => textDisplay
+        .setContent(`Message container visibility enabled.`)
+    )
+
+  await interactionReplySafelyComponents(interaction, [replyContainer]);
+  
 }
