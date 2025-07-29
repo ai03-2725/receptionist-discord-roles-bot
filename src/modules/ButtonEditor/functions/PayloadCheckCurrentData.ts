@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, ContainerBuilder, MessageFlags } from "discord.js"
 import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } from "./Common"
+import { interactionReplySafelyComponents } from "../../../util/InteractionReplySafely"
 
 // Check current message's contents and return a report to the user
 export const checkCurrentData = async (editorData: EditorDataType, interaction: ChatInputCommandInteraction) => {
@@ -56,8 +57,5 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
         .setContent(checksPassed ? "Checks passed; can be deployed with `/buttoneditor deploy`." : "Checks failed; not ready for deployment.")
     )
 
-  await interaction.reply({
-    components: [replyContainer],
-    flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral
-  })
+  await interactionReplySafelyComponents(interaction, [replyContainer])
 }

@@ -1,6 +1,7 @@
 import { MessageFlags, type ChatInputCommandInteraction } from "discord.js";
 import { isValidHex } from "../../../util/IsValidHex";
 import { type EditorDataType, initUserDataIfNecessary } from "./Common";
+import { interactionReplySafely } from "../../../util/InteractionReplySafely";
 
 
 // Set the container color of the message being edited
@@ -11,8 +12,8 @@ export const setContainerColor = async (editorData: EditorDataType, interaction:
   const containerColor = interaction.options.getString('color');
   if (!containerColor || isValidHex(containerColor)) {
     userData.containerColor = containerColor || undefined;
-    await interaction.reply({ content: `${containerColor ? "Updated" : "Removed"} the button message's container color.`, flags: MessageFlags.Ephemeral });
+    await interactionReplySafely(interaction, `${containerColor ? "Updated" : "Removed"} the button message's container color.`);
   } else {
-    await interaction.reply({ content: `Invalid container color hex code. Please provide a 6-char hex value without the preceding #.`, flags: MessageFlags.Ephemeral });
+    await interactionReplySafely(interaction, `Invalid container color hex code. Please provide a 6-char hex value without the preceding #.`);
   }
 }

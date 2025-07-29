@@ -1,5 +1,6 @@
 import { MessageFlags, type CacheType, type Interaction } from "discord.js";
 import type { GenericModuleCommandMap } from "./GenericCommandModule";
+import { interactionReplySafely } from "../util/InteractionReplySafely";
 
 export async function DefaultCommandHandler(interaction: Interaction<CacheType>, commandsMap: GenericModuleCommandMap) {
   
@@ -18,13 +19,7 @@ export async function DefaultCommandHandler(interaction: Interaction<CacheType>,
       await commandPayload(interaction);
     } catch (error) {
       console.error(error);
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: 'There was an error while processing this request.', flags: MessageFlags.Ephemeral });
-      } else {
-        await interaction.reply({ content: 'There was an error while processing this request.', flags: MessageFlags.Ephemeral });
-      }
+      await interactionReplySafely(interaction, 'There was an error while processing this request.');
     }
-
   }
-
 }

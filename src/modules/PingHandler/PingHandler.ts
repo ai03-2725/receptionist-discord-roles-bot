@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, InteractionContextType } from "discord.js";
 import { type ModuleParams } from "../../structures/BaseModules";
 import { GenericCommandModule } from "../../structures/GenericCommandModule";
+import { interactionReplySafely } from "../../util/InteractionReplySafely";
 
 export class PingHandler extends GenericCommandModule {
 
@@ -20,7 +21,7 @@ export class PingHandler extends GenericCommandModule {
 	      .setContexts(InteractionContextType.Guild),
       // Payload
       async (interaction: ChatInputCommandInteraction) => {
-        await interaction.reply('Reaction bot is operating.');
+        await interactionReplySafely(interaction, 'Reaction bot is operating.');
       }
     ]);
   }

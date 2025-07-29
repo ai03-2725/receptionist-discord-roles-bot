@@ -17,6 +17,7 @@ import { setBody } from "./functions/PayloadSetBody";
 import { setContainerColor } from "./functions/PayloadSetContainerColor";
 import { clearEditor } from "./functions/PayloadClearEditor";
 import type { Database } from "better-sqlite3";
+import { interactionReplySafely } from "../../util/InteractionReplySafely";
 
 
 interface ButtonEditorParams extends ModuleParams {
@@ -140,17 +141,18 @@ export class ButtonEditor extends SpecializedCommandModule {
       // Commands handling
       // All button editor commands are a subcommand of /buttoneditor, so only respond to that
       if (interaction.isChatInputCommand() && interaction.commandName == "buttoneditor") {
+
         // Only allow running in guild text channels; sanity-check its existence
         const activeChannel = interaction.channel?.type === ChannelType.GuildText ? interaction.channel : null;
         if (!activeChannel) {
-          await interaction.reply({content: 'This channel is not a text channel.', flags: MessageFlags.Ephemeral});
+          await interactionReplySafely(interaction, 'This command can only be run in text channels.');
           return
         }
 
         // Get subcommand
         const subcommand = interaction.options.getSubcommand(false)
         if (!subcommand) {
-          await interaction.reply({content: "`/buttoneditor`: button message editor. Use subcommands for functionality.", flags: MessageFlags.Ephemeral});
+          await interactionReplySafely(interaction, "`/buttoneditor`: button message editor.\nUse subcommands for functionality.");
           return
         }
 
@@ -178,11 +180,11 @@ export class ButtonEditor extends SpecializedCommandModule {
             await clearEditor(this.editorData, interaction);
             break;
           default:
-            await interaction.reply({content: `\`/buttoneditor\`: Unknown subcommand "${subcommand}".`, flags: MessageFlags.Ephemeral})
+            await interactionReplySafely(interaction, `\`/buttoneditor\`: Unknown subcommand "${subcommand}".`);
             return
         }
+
       }
-      
     })
 
   }

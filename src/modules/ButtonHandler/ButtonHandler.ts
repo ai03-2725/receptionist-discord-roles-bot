@@ -4,6 +4,7 @@ import { Events, MessageFlags } from "discord.js";
 import { handleSourceMismatch, verifySourceMatch } from "./functions/SourceMismatchReporter";
 import { ButtonActionMappings } from "../ButtonEditor/functions/Common";
 import { ConditionallyReply } from "./functions/ConditionallyReply";
+import { interactionReplySafely } from "../../util/InteractionReplySafely";
 
 
 interface ButtonHandlerParams extends ModuleParams {
@@ -45,7 +46,7 @@ export class ButtonHandler extends Module {
       } catch (error) {
         console.error("Failed to fetch button entry from database:")
         console.error(error)
-        await interaction.reply({content: "Failed to locate info for this button. Please contact the bot administrator.", flags: MessageFlags.Ephemeral})
+        await interactionReplySafely(interaction, "Failed to locate info for this button. Please contact the bot administrator.");
         return;
       }
 
@@ -65,7 +66,7 @@ export class ButtonHandler extends Module {
       // Sanity check interaction required fields 
       if (!interaction.guild || !interaction.member) {
         console.error(`Interaction somehow lacks guild or member.`);
-        await interaction.reply({content: "Could not assign role: System error. \nPlease contact an administrator.", flags: MessageFlags.Ephemeral})
+        await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
         return
       }
 
@@ -73,7 +74,7 @@ export class ButtonHandler extends Module {
       const roleToAssign = interaction.guild.roles.resolve(buttonData.role)
       if (!roleToAssign) {
         console.error(`Role specified by button ID ${buttonData.button_id} (role ID ${buttonData.role}) does not exist.`);
-        await interaction.reply({content: "Could not assign role: Specified role seems to be missing. \nPlease contact an administrator.", flags: MessageFlags.Ephemeral})
+        await interactionReplySafely(interaction, "Could not assign role: Specified role seems to be missing. \nPlease contact an administrator.");
         return
       }
 
@@ -81,7 +82,7 @@ export class ButtonHandler extends Module {
       const member = interaction.guild.members.resolve(interaction.member.user.id)
       if (!member) {
         console.error(`Could not resolve user ${interaction.member.user.username} (ID ${interaction.member.user.id}) in guild ${interaction.guild.name} (ID ${interaction.guild.name}).`);
-        await interaction.reply({content: "Could not assign role: System error. \nPlease contact an administrator.", flags: MessageFlags.Ephemeral})
+        await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
         return
       }
 
@@ -120,13 +121,9 @@ export class ButtonHandler extends Module {
             break;
         }
       } catch (error) {
-        try {
-          await interaction.reply({content: "Could not assign role: System error. \nPlease contact an administrator.", flags: MessageFlags.Ephemeral})
-        } catch (error) {
-          
-        }
-        console.error("Failed to update roles.")
+        console.error("Failed to update roles for button press:")
         console.error(error)
+        await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
       }
     })
   }

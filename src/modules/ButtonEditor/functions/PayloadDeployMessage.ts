@@ -3,6 +3,7 @@ import { splitArrayIntoChunks } from "../../../util/SplitArrayIntoChunks";
 import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } from "./Common";
 import { v7 as uuidv7 } from "uuid";
 import type { Database } from "better-sqlite3";
+import { interactionReplySafely } from "../../../util/InteractionReplySafely";
 
 // Assembles the components required to submit the assembled message
 const buildMessage = (editorData: EditorDataType, userId: string) => {
@@ -108,31 +109,29 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
   // First sanity check the current data
   const sanityCheckResult = sanityCheckData(editorData, interaction.user.id)
   if (!sanityCheckResult.success) {
-    await interaction.reply({ content: sanityCheckResult.error || "Data sanity check failed.", flags: MessageFlags.Ephemeral });
+    await interactionReplySafely(interaction, sanityCheckResult.error || "Data sanity check failed.");
     return
   }
 
   // Verify that the message can be sent in the current channel
   if (!(interaction.channel?.type == ChannelType.GuildText && interaction.channel.isSendable())) {
-    await interaction.reply({ content: "This channel is either not a text channel or is not sendable by the bot.", flags: MessageFlags.Ephemeral });
+    await interactionReplySafely(interaction, "This channel is either not a text channel or is not sendable by the bot.");
     return
   }
 
   // Then build the message components from the current editor data
-  const messageData = buildMessage(editorData, interaction.user.id)
+  const messageData = buildMessage(editorData, interaction.user.id);
 
   // Then send the message
   let sentMessage: Message<true>;
   try {
-    console.log("Attempting to send message:")
-    console.log(JSON.stringify(messageData.components))
     sentMessage = await interaction.channel.send({
       components: messageData.components,
       flags: MessageFlags.IsComponentsV2
     })
   } catch (error) {
-    await interaction.reply({content: "Failed to send the message. See bot log for more details.", flags: MessageFlags.Ephemeral});
-    await interaction.followUp({content: `\`\`\`${JSON.stringify(error)}\`\`\``, flags: MessageFlags.Ephemeral});
+    const replySuccess = await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.")
+    replySuccess && await interactionReplySafely(interaction, `\`\`\`${JSON.stringify(error)}\`\`\``); // interactionReplySafely automatically switches to followUp as necessary
     return
   }
 
@@ -158,11 +157,12 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
   } catch (error) {
     console.error("Failed to commit button data to db:");
     console.error(error);
+    // Roll back the sent message to avoid having buttons sitting around without db entries
     sentMessage.delete();
-    await interaction.reply({content: "Failed to commit button mappings data to the database. See the bot logs for details.", flags: MessageFlags.Ephemeral});
+    await interactionReplySafely(interaction, "Failed to commit button mappings data to the database. See the bot logs for details.");
     return;
   }
 
   // Finally reply
-  await interaction.reply({content: "Message sent.\n\nThe current editor data is still retained for sending additional copies of this message; use `/buttoneditor clear` to start afresh.", flags: MessageFlags.Ephemeral});
+  await interactionReplySafely(interaction, "Message sent.\n\nThe current editor data is still retained for sending additional copies of this message; use `/buttoneditor clear` to start afresh.");
 }

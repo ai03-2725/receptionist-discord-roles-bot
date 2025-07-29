@@ -31,7 +31,6 @@ Please wait for a stable release.
 ---
 
 # Todo
-- Make all interactions more robust (try/catch where they don't exist yet)
 - Make hex color input more flexible (with or without preceding hash, trim on server-side)
 - Add sanity checks on emote inputs
 - Provide feedback on each edit command
