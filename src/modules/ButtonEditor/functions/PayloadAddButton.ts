@@ -1,6 +1,6 @@
-import { type ChatInputCommandInteraction, MessageFlags, type Role, type APIRole } from "discord.js";
+import { type ChatInputCommandInteraction, MessageFlags, type Role, type APIRole, ContainerBuilder } from "discord.js";
 import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } from "./Common";
-import { interactionReplySafely } from "../../../util/InteractionReplySafely";
+import { interactionReplySafely, interactionReplySafelyComponents } from "../../../util/InteractionReplySafely";
 import { checkIfValidEmoji } from "../../../util/CheckIfValidEmoji";
 
 
@@ -14,7 +14,7 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
   }
 
   const emote = interaction.options.getString('emote')
-  const label = interaction.options.getString('emote')
+  const label = interaction.options.getString('label')
 
   // Either an emote or label must be provided
   if (!emote && !label) {
@@ -33,11 +33,37 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
   
   // Sanity checks passed, push button onto editor data
   userData.buttons.push({
-    emote: interaction.options.getString('emote') || undefined,
-    label: interaction.options.getString('label') || undefined,
+    emote: emote || undefined,
+    label: label || undefined,
     role: <Role | APIRole>interaction.options.getRole('role'), // Guaranteed to exist since it's a required role option field
     action: ButtonActionMappings[<"ASSIGN" | "REMOVE" | "TOGGLE">interaction.options.getString('action')], // Guaranteed to be one of these three since it's a required choice field
     silent: interaction.options.getBoolean('silent') || false
   })
-  await interactionReplySafely(interaction, `Added button ID ${userData.buttons.length - 1}. There are now ${userData.buttons.length} buttons on this message.`);
+
+  // Reply 
+  const replyContainer = new ContainerBuilder()
+    .setAccentColor(0x808080)
+    .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent(`**Success**`),
+      textDisplay => textDisplay
+        .setContent(`Button added. There ${userData.buttons.length === 1 ? "is" : "are"} now ${userData.buttons.length} button${userData.buttons.length !== 1 ? "s" : ""} on this message.`),
+      textDisplay => textDisplay
+        .setContent(`Added data is shown below for confirmation.`)
+    )
+    .addSeparatorComponents(
+      separator => separator
+    )
+    .addTextDisplayComponents(
+      textDisplay => textDisplay
+        .setContent(
+`- Button ID: ${userData.buttons.length - 1}
+- Action: ${ButtonActionMappings[<"ASSIGN" | "REMOVE" | "TOGGLE">interaction.options.getString('action')]}
+- Role: <@&${interaction.options.getRole('role')!.id}>
+- Label: ${label ? `\`${label}\`` : "None"}
+- Emote: ${emote ? emote : "None"}
+- Silent: ${interaction.options.getBoolean('silent')}`),
+    )
+
+  await interactionReplySafelyComponents(interaction, [replyContainer]);
 }

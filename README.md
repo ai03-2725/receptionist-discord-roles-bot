@@ -31,13 +31,10 @@ Please wait for a stable release.
 ---
 
 # Todo
-- Add sanity checks on emote inputs
 - Provide feedback on each edit command
-- Modularize ButtonHandler
 - Add prune support to clean up obsolete database entries
 - Cleanup logging, add logging where useful
 - Add bot config options (bot owner IDs for global prune permissions, log level)
-- Add rate limiting
 - Docker containerize
 - Document installation process
 

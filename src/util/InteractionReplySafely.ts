@@ -9,9 +9,9 @@ export const interactionReplySafely = async (interaction: Interaction<any>, mess
     if (!interaction.isRepliable()) return false;
     // If the interaction was replied or deferred, use followUp instead
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({content: message, flags: ephemeral ? MessageFlags.Ephemeral : undefined});
+      await interaction.followUp({content: message, flags: (ephemeral ? MessageFlags.Ephemeral : undefined)});
     } else {
-      await interaction.reply({content: message, flags: ephemeral ? MessageFlags.Ephemeral : undefined});
+      await interaction.reply({content: message, flags: (ephemeral ? MessageFlags.Ephemeral : undefined)});
     }
     return true;
   } catch (error) {

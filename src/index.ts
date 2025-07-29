@@ -11,7 +11,6 @@ import dotenv from 'dotenv';
 import hash from 'object-hash';
 import {
   readFileSync,
-  writeFileSync,
   existsSync,
   mkdirSync
 } from 'fs';
@@ -19,67 +18,21 @@ import Database from 'better-sqlite3';
 
 import type { CommandModule, Module } from "./structures/BaseModules";
 import { PingHandler } from "./modules/PingHandler/PingHandler";
-import { DEFAULT_DATA_JSON, type BotDataJson } from "./structures/BotDataJson";
+import { createBotDataDirIfNecessary, CURRENT_BOT_CONFIG_VERSION, DEFAULT_DATA_JSON, loadBotDataJson, updateBotDataJson, type BotDataJson } from "./core/BotData";
 import { ButtonEditor } from "./modules/ButtonEditor/ButtonEditor";
 import { ButtonHandler } from "./modules/ButtonHandler/ButtonHandler";
+import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
+import { getAppToken, loadEnvVars } from "./core/EnvVars";
+import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
 
 // Load environment variables
-dotenv.config();
-const APP_TOKEN = process.env.APP_TOKEN;
-if (!APP_TOKEN) {
-  console.error("Error: Missing APP_TOKEN environment variable. \nPlease supply one either via setting the environment variable or in a .env file.");
-  process.exit(1);
-}
-const APPLICATION_ID = process.env.APPLICATION_ID;
-if (!APPLICATION_ID) {
-  console.error("Error: Missing APPLICATION_ID environment variable. \nPlease supply one either via setting the environment variable or in a .env file.");
-  process.exit(1);
-}
+loadEnvVars()
 
-let botData: BotDataJson;
+// Make sure that the data directory exists
+createBotDataDirIfNecessary()
 
-// Check if data directory exists
-if (!existsSync('./data')) {
-  console.warn("Data directory not found - creating one now.");
-  console.warn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that the ./data directory is being retained properly.");
-  try {
-    mkdirSync('./data');
-  } catch (error) {
-    console.error("Could not create the ./data directory.");
-    process.exit(1);
-  }
-}
-// Check if base data file exists
-if (!existsSync('./data/bot-data.json')) {
-  // If not, create the data file
-  console.warn("Did not find a ./data/bot-data.json - creating one now.")
-  console.warn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.json is being retained properly.")
-  try {
-    writeFileSync('./data/bot-data.json', JSON.stringify(DEFAULT_DATA_JSON), 'utf-8');
-  } catch (error) {
-    console.error("Could not write a default ./data/bot-data.json for storing necessary data.")
-    process.exit(1);
-  }
-  botData = DEFAULT_DATA_JSON;
-} else {
-  // If file exists already, simply read in the data
-  let botDataJson: string;
-  try {
-    botDataJson = readFileSync('./data/bot-data.json', 'utf-8');
-  } catch (error) {
-    console.error("Failed to read ./data/bot-data.json.");
-    console.error(error);
-    process.exit(1);
-  }
-  try {
-    botData = JSON.parse(botDataJson)
-  } catch (error) {
-    console.error("Failed to parse ./data/bot-data.json as JSON data.");
-    console.error(error);
-    process.exit(1);
-  }
-}
-
+// Load bot config data
+let botData = loadBotDataJson();
 
 // Check if sqlite DBs exist, warning the user if they don't
 if (!existsSync('./data/bot-data.db')) {
@@ -96,14 +49,14 @@ const client = new Client({
 });
 
 
-// Create an instance of all command modules
+// Create an instance of all bot modules
 
 // Command modules - modules based on CommandModule which provide slash command(s)
 const commandModules: CommandModule[] = []
 commandModules.push(new PingHandler({client: client}));
 commandModules.push(new ButtonEditor({client: client, db: db}));
 
-// Non-command modules 
+// Non-command modules - these will not be queried for their commands
 const nonCommandModules: Module[] = []
 nonCommandModules.push(new ButtonHandler({client: client, db: db}))
 
@@ -115,51 +68,15 @@ for (const module of commandModules) {
 }
 
 // If any changes have occurred to the slash commands since last boot, push changes via REST API
-const commandsHash = hash(allCommands, {unorderedArrays: true});
-if (botData.lastSuccessfulCommandsHash === commandsHash) { 
-  console.log("Commands hash match - continuing without redundant register update.")
-} else {
-  // Changes detected, register all known commands via REST API
-  console.log("Commands hash has changed - pushing latest data via REST API.")
-  let registerCommandsList: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
-  allCommands.forEach(command => {
-    registerCommandsList.push(command.toJSON());
-  })
-  const rest = new REST().setToken(APP_TOKEN);
-  (async () => {
-    try {
-      console.log(`Pushing ${registerCommandsList.length} application commands.`);
-      const data = await rest.put(
-        Routes.applicationCommands(APPLICATION_ID),
-        { body: registerCommandsList },
-      );
-
-      console.log(`Successfully registered application commands. Returned response:`);
-      console.log(data);
-      // Update known good hash
-      botData.lastSuccessfulCommandsHash = commandsHash;
-      try {
-        writeFileSync('./data/bot-data.json', JSON.stringify(botData), 'utf-8')
-      } catch (error) {
-        console.error("Could not write updated data to ./data/bot-data.json.")
-        console.error(error);
-        process.exit(1);
-      }
-      console.log("Wrote updated commands hash to ./data/bot-data.json.")
-    } catch (error) {
-      console.error("Failed to push application commands.");
-      console.error(error);
-      process.exit(1);
-    }
-  })();
-}
+await pushSlashCommandsIfNecessary(allCommands, botData)
 
 // Run once after the bot is operational
 client.once(Events.ClientReady, async readyClient => {
 	console.log(`Initialization completed. Logged in as ${readyClient.user.tag}.`);
-  readyClient.user.setAvatar('./src/assets/icon.png')
+
+  // Update avatar if it has changed since last boot
+  updateBotIconIfNecessary(readyClient, botData)
 });
 
-
 // Log in to Discord
-client.login(APP_TOKEN);
+client.login(getAppToken());
