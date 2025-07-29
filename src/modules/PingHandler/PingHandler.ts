@@ -18,9 +18,19 @@ export class PingHandler extends GenericCommandModule {
         .setName("ping")
         .setDescription("Verifies whether the bot is operating or not.")
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-	      .setContexts(InteractionContextType.Guild),
+	      .setContexts(InteractionContextType.Guild)
+        .addStringOption(option => option
+          .setName("text")
+          .setDescription("Replies with this text (and logs it to console for debug reasons).")
+          .setRequired(false)
+        ),
       // Payload
       async (interaction: ChatInputCommandInteraction) => {
+        if (interaction.options.getString("text")) {
+          console.log("Received a ping with the following text:");
+          console.log(interaction.options.getString("text"));
+          await interactionReplySafely(interaction, `Reaction bot is operating.\n\nReceived text:\n\`\`\`\n${interaction.options.getString("text")}\n\`\`\``);
+        }
         await interactionReplySafely(interaction, 'Reaction bot is operating.');
       }
     ]);
