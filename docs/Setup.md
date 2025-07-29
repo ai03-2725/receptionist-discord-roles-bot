@@ -33,8 +33,23 @@ At this point, your Discord app should open, and you should be able to add the b
 1. Prepare a server capable of running a docker-compose stack (i.e. `almalinux` + `podman` + `podman-compose` (+ `podman-docker` + `dockge` perhaps) or just docker on a 24/7 PC, whatever you prefer).
    - This goes beyond the scope of this guide, so look elsewhere for guides.
    - Make sure the setup is operational by running a hello-world or other container beforehand to rule out such issues.
-2. TODO
-3. Within the docker-compose file, set up the following environment variable options:
+2. Write a docker-compose.yaml file as follows:  
+   ```
+   services:
+     receptionist:
+       image: TODO
+       container_name: receptionist
+       restart: unless-stopped
+       environment:
+         APPLICATION_ID: 000000000000000000
+         APP_TOKEN: ABCDABCDABCDABCDABCDABCD
+         BOT_OWNER_IDS: 000000000000000000
+       volumes:
+         - ./data:/app/data
+   networks: {}
+   ```
+   For the volume, add a `:Z` at the end on Podman (or a lowercase `:z` if accessing the folder from another container for backups).
+4. Within the docker-compose file, fill in at minimum the required environment variable options:
    - `APP_TOKEN`: The Discord app token which you noted down earlier.
    - `APPLICATION_ID`: The Discord application ID which you noted down earlier.
       - Make sure that the above two values are not swapped.
@@ -44,7 +59,7 @@ At this point, your Discord app should open, and you should be able to add the b
       - If specifying multiple users, separate with commas (i.e. `0000000000,1111111111,2222222222`).
    - Optionally `LOG_DEBUG`: If set to `true`, the bot will output debug log messages.
    - Optionally `LOG_AUDIT`: If set to `false`, bht bot will skip printing audit messages (logs for role assigns/removals, commands that create clickable messages, etc).
-4. If supplying a custom bot icon, place it in `./data/custom-bot-icon.png`.
+5. If supplying a custom bot icon, place it in `./data/custom-bot-icon.png`.
 
 ## Setting up the bot within your Discord Guild/Server
 

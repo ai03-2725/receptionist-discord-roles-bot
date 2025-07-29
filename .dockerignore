@@ -1,0 +1,10 @@
+**/node_modules
+dist
+docs
+data
+.env
+.gitignore
+.dockerignore
+.nvmrc
+dockerfile
+README.md

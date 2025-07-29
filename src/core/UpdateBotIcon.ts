@@ -17,7 +17,7 @@ export const updateBotIconIfNecessary = async (client: Client<true>, botData: Bo
     botIcon = readFileSync("./data/custom-bot-icon.png");
   } else {
     logDebug("Using stock bot icon.")
-    botIcon = readFileSync("./src/assets/default-bot-icon.png")
+    botIcon = readFileSync("./assets/default-bot-icon.png")
   }
   
   // Check if the icon has been modified since last boot; upload if necessary
@@ -26,7 +26,7 @@ export const updateBotIconIfNecessary = async (client: Client<true>, botData: Bo
   if (botData.lastKnownBotIconHash !== botIconHash) {
     logInfo("Bot icon has been modified - uploading new version.");
     try {
-      await client.user.setAvatar('./src/assets/icon.png')
+      await client.user.setAvatar(botIcon)
       logInfo("Bot icon updated.")
       botData.lastKnownBotIconHash = botIconHash;
       updateBotDataJson(botData);

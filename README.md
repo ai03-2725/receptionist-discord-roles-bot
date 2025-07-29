@@ -2,10 +2,8 @@
 A simple Discord bot that handles self-role-assigning.
 
 
-
 ### Currently in progress
 Please wait for a stable release.  
-
 
 
 ### Features
@@ -31,11 +29,7 @@ Please wait for a stable release.
 
 ---
 
-# Todo
+## Planned/Todo
 - Add prune support to clean up obsolete database entries
-- Docker containerize
-- Document installation process
-
-## Planned
 - Role assign dropdown menus
 
