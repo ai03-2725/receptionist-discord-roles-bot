@@ -17,6 +17,7 @@ import { ButtonHandler } from "./modules/ButtonHandler/ButtonHandler";
 import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
 import { getAppToken, loadEnvVars } from "./core/EnvVars";
 import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
+import { logDebug, logInfo, LogLevel, logWarn } from "./core/Log";
 
 // Load environment variables
 loadEnvVars()
@@ -29,14 +30,17 @@ let botData = loadBotDataJson();
 
 // Check if sqlite DBs exist, warning the user if they don't
 if (!existsSync('./data/bot-data.db')) {
-  console.warn("Did not find a ./data/bot-data.db database file - creating one now.")
-  console.warn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.db is being retained properly.")
+  logWarn("Did not find a ./data/bot-data.db database file - creating one now.")
+  logWarn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.db is being retained properly.")
 }
 // Connect to sqlite dbs, creating them if not existent already
+logDebug("Opening database")
 const db = new Database('./data/bot-data.db');
+logDebug("Database successfully opened")
 
 
 // Create a new client instance
+logDebug("Creating client")
 const client = new Client({ 
   intents: [GatewayIntentBits.Guilds] 
 });
@@ -45,16 +49,19 @@ const client = new Client({
 // Create an instance of all bot modules
 
 // Command modules - modules based on CommandModule which provide slash command(s)
+logDebug("Loading modules with commands")
 const commandModules: CommandModule[] = []
 commandModules.push(new PingHandler({client: client}));
 commandModules.push(new ButtonEditor({client: client, db: db}));
 
 // Non-command modules - these will not be queried for their commands
+logDebug("Loading modules without commands")
 const nonCommandModules: Module[] = []
 nonCommandModules.push(new ButtonHandler({client: client, db: db}))
 
 
 // Create a global commands list based on the commands list of each module
+logDebug("Querying all modules for commands")
 let allCommands: SharedSlashCommand[] = [];
 for (const module of commandModules) {
   allCommands = allCommands.concat(module.getCommands())
@@ -65,7 +72,7 @@ await pushSlashCommandsIfNecessary(allCommands, botData)
 
 // Run once after the bot is operational
 client.once(Events.ClientReady, async readyClient => {
-	console.log(`Initialization completed. Logged in as ${readyClient.user.tag}.`);
+	logInfo(`Initialization completed. Logged in as ${readyClient.user.tag}.`);
 
   // Update avatar if it has changed since last boot
   updateBotIconIfNecessary(readyClient, botData)

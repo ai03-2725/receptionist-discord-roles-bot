@@ -2,6 +2,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { type ModuleParams } from "../../structures/BaseModules";
 import { GenericCommandModule } from "../../structures/GenericCommandModule";
 import { interactionReplySafely } from "../../util/InteractionReplySafely";
+import { logInfo } from "../../core/Log";
 
 export class PingHandler extends GenericCommandModule {
 
@@ -27,8 +28,8 @@ export class PingHandler extends GenericCommandModule {
       // Payload
       async (interaction: ChatInputCommandInteraction) => {
         if (interaction.options.getString("text")) {
-          console.log("Received a ping with the following text:");
-          console.log(interaction.options.getString("text"));
+          logInfo("Received a ping with the following text:");
+          logInfo(interaction.options.getString("text"));
           await interactionReplySafely(interaction, `Reaction bot is operating.\n\nReceived text:\n\`\`\`\n${interaction.options.getString("text")}\n\`\`\``);
         }
         await interactionReplySafely(interaction, 'Reaction bot is operating.');

@@ -5,6 +5,8 @@ import { handleSourceMismatch, verifySourceMatch } from "./functions/SourceMisma
 import { ButtonActionMappings } from "../ButtonEditor/functions/Common";
 import { ConditionallyReply } from "./functions/ConditionallyReply";
 import { interactionReplySafely } from "../../util/InteractionReplySafely";
+import { logAudit, logDebug, logError, logInfo } from "../../core/Log";
+import { makeInteractionPrintable } from "../../util/MakeInteractionPrintable";
 
 
 interface ButtonHandlerParams extends ModuleParams {
@@ -44,8 +46,8 @@ export class ButtonHandler extends Module {
       try {
         buttonData = <ButtonTableEntry | undefined>buttonQuery.get(buttonId);
       } catch (error) {
-        console.error("Failed to fetch button entry from database:")
-        console.error(error)
+        logError("Failed to fetch button entry from database:")
+        logError(error)
         await interactionReplySafely(interaction, "Failed to locate info for this button. Please contact the bot administrator.");
         return;
       }
@@ -56,6 +58,9 @@ export class ButtonHandler extends Module {
         return;
       }
 
+      logDebug("Button Handler: Received button interaction to handle:")
+      logDebug(makeInteractionPrintable(interaction))
+
       // Check source integrity
       const errorStrings = verifySourceMatch(interaction, buttonData)
       if (errorStrings.length > 0) {
@@ -65,7 +70,9 @@ export class ButtonHandler extends Module {
 
       // Sanity check interaction required fields 
       if (!interaction.guild || !interaction.member) {
-        console.error(`Interaction somehow lacks guild or member.`);
+        logError(`Interaction somehow lacks guild or member.`);
+        logError(`Interaction details:`)
+        logError(makeInteractionPrintable(interaction))
         await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
         return
       }
@@ -73,7 +80,7 @@ export class ButtonHandler extends Module {
       // Find the role to assign
       const roleToAssign = interaction.guild.roles.resolve(buttonData.role)
       if (!roleToAssign) {
-        console.error(`Role specified by button ID ${buttonData.button_id} (role ID ${buttonData.role}) does not exist.`);
+        logDebug(`Role specified by button ID ${buttonData.button_id} (role ID ${buttonData.role}) does not exist. Perhaps the role was deleted?`);
         await interactionReplySafely(interaction, "Could not assign role: Specified role seems to be missing. \nPlease contact an administrator.");
         return
       }
@@ -81,13 +88,16 @@ export class ButtonHandler extends Module {
       // Resolve the member within the guild
       const member = interaction.guild.members.resolve(interaction.member.user.id)
       if (!member) {
-        console.error(`Could not resolve user ${interaction.member.user.username} (ID ${interaction.member.user.id}) in guild ${interaction.guild.name} (ID ${interaction.guild.name}).`);
+        logError(`Could not resolve user ${interaction.member.user.username} (ID ${interaction.member.user.id}) in guild ${interaction.guild.name} (ID ${interaction.guild.name}).`);
+        logError(`Interaction details:`)
+        logError(makeInteractionPrintable(interaction))
         await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
         return
       }
 
       // Check if user already has the role in question
       const memberAlreadyHasRole = member.roles.cache.some(role => role.id === roleToAssign.id)
+      logDebug(memberAlreadyHasRole ? `User already has specified role - using to switch behavior.` : `User currently doesn't have specified role.`)
 
 
       try {
@@ -96,33 +106,41 @@ export class ButtonHandler extends Module {
         switch (buttonData.action) {
           case ButtonActionMappings.ASSIGN:
             if (memberAlreadyHasRole) {
+              logAudit(`Skipping assigning role ${roleToAssign.name} (ID ${roleToAssign.id}) to user ${member.user.globalName} (ID ${member.id}) - member already has role.`)
               await ConditionallyReply(interaction, `You already have the role <@&${roleToAssign.id}>.`, buttonData.silent)
             } else {
               await member.roles.add(roleToAssign)
+              logAudit(`Assigned role ${roleToAssign.name} (ID ${roleToAssign.id}) to user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Assigned role <@&${roleToAssign.id}>.`, buttonData.silent)
             }
             break;
           case ButtonActionMappings.REMOVE:
             if (!memberAlreadyHasRole) {
+              logAudit(`Skipping removing role ${roleToAssign.name} (ID ${roleToAssign.id}) from user ${member.user.globalName} (ID ${member.id}) - member already doesn't have role.`)
               await ConditionallyReply(interaction, `You already don't have the role <@&${roleToAssign.id}>.`, buttonData.silent)
             } else {
               await member.roles.remove(roleToAssign)
+              logAudit(`Removed role ${roleToAssign.name} (ID ${roleToAssign.id}) to user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Removed role <@&${roleToAssign.id}>.`, buttonData.silent)
             }
             break;
           case ButtonActionMappings.TOGGLE:
             if (memberAlreadyHasRole) {
               await member.roles.remove(roleToAssign)
+              logAudit(`Toggle-removed role ${roleToAssign.name} (ID ${roleToAssign.id}) for user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Removed role <@&${roleToAssign.id}>.`, buttonData.silent)
             } else {
               await member.roles.add(roleToAssign)
+              logAudit(`Toggle-enabled role ${roleToAssign.name} (ID ${roleToAssign.id}) for user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Assigned role <@&${roleToAssign.id}>.`, buttonData.silent)
             }
             break;
         }
       } catch (error) {
-        console.error("Failed to update roles for button press:")
-        console.error(error)
+        logError("Failed to update roles for button press:")
+        logError(error)
+        logError("Interaction details:")
+        logError(makeInteractionPrintable(interaction))
         await interactionReplySafely(interaction, "Could not assign role: System error. \nPlease contact an administrator.");
       }
     })

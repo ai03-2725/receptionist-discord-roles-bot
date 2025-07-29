@@ -11,4 +11,5 @@ TODO: All of the Docker/Podman parts
     - At least one must exist.
     - Right click your username either in the members list on the right panel or on a sent message in Discord, and select "Copy User ID". Paste the value to this environment variable.
     - If specifying multiple users, separate with commas: `0000000000,1111111111,2222222222`
-1. If supplying a custom bot icon, place it in `./data/custom-bot-icon.png`.
+  - Optionally `LOG_DEBUG`: If set to `true`, `1`, or any non-empty string, the bot will output debug log messages.
+2. If supplying a custom bot icon, place it in `./data/custom-bot-icon.png`.

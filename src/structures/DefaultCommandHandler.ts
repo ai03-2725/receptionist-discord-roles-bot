@@ -1,6 +1,7 @@
 import { MessageFlags, type CacheType, type Interaction } from "discord.js";
 import type { GenericModuleCommandMap } from "./GenericCommandModule";
 import { interactionReplySafely } from "../util/InteractionReplySafely";
+import { logError } from "../core/Log";
 
 export async function DefaultCommandHandler(interaction: Interaction<CacheType>, commandsMap: GenericModuleCommandMap) {
   
@@ -18,7 +19,8 @@ export async function DefaultCommandHandler(interaction: Interaction<CacheType>,
       const [, commandPayload] = currentCommand
       await commandPayload(interaction);
     } catch (error) {
-      console.error(error);
+      logError(`Failed to handle command ${currentCommand}:`)
+      logError(error);
       await interactionReplySafely(interaction, 'There was an error while processing this request.');
     }
   }

@@ -4,6 +4,8 @@ import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } fr
 import { v7 as uuidv7 } from "uuid";
 import type { Database } from "better-sqlite3";
 import { interactionReplySafely } from "../../../util/InteractionReplySafely";
+import { logAudit, logDebug, logError } from "../../../core/Log";
+import { makeInteractionPrintable } from "../../../util/MakeInteractionPrintable";
 
 // Assembles the components required to submit the assembled message
 const buildMessage = (editorData: EditorDataType, userId: string) => {
@@ -19,6 +21,8 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
   // Each ActionRow can have up to 5 elements
   // Split buttons array into chunks of 5 each
   const splitButtons = splitArrayIntoChunks(userData.buttons, 5);
+  logDebug("Button data:")
+  logDebug(splitButtons)
   for (const chunk of splitButtons) {
     const currentActionRow = new ActionRowBuilder()
     for (const button of chunk) {
@@ -57,6 +61,12 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
       .setContent(userData.body!)
     mainDisplayComponents.push(textDisplay)
   }
+
+  logDebug("Message building completed.")
+  logDebug("Message components:")
+  logDebug(mainDisplayComponents.concat(buttonRows))
+  logDebug("ID to role mappings:")
+  logDebug(idToRoleMappings)
 
   return {
     components: mainDisplayComponents.concat(buttonRows),
@@ -109,18 +119,25 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
   // First sanity check the current data
   const sanityCheckResult = sanityCheckData(editorData, interaction.user.id)
   if (!sanityCheckResult.success) {
+    logDebug(`Sanity check on message failed: ${sanityCheckResult}`)
+    logDebug(editorData.get(interaction.user.id))
     await interactionReplySafely(interaction, sanityCheckResult.error || "Data sanity check failed.");
     return
   }
 
   // Verify that the message can be sent in the current channel
   if (!(interaction.channel?.type == ChannelType.GuildText && interaction.channel.isSendable())) {
+    logDebug(`Failed to post message to non-guild-text-channel.`)
+    logDebug(interaction.channel)
     await interactionReplySafely(interaction, "This channel is either not a text channel or is not sendable by the bot.");
     return
   }
 
   // Then build the message components from the current editor data
   const messageData = buildMessage(editorData, interaction.user.id);
+
+  logDebug(`Attempting to send the message to the following channel.`)
+  logDebug(interaction.channel)
 
   // Then send the message
   let sentMessage: Message<true>;
@@ -130,6 +147,12 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
       flags: MessageFlags.IsComponentsV2
     })
   } catch (error) {
+    logError("Failed to send a button message.")
+    logError(error)
+    logError("Message data:")
+    logError(messageData)
+    logError("Interaction details:")
+    logError(makeInteractionPrintable(interaction))
     const replySuccess = await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.")
     replySuccess && await interactionReplySafely(interaction, `\`\`\`${JSON.stringify(error)}\`\`\``); // interactionReplySafely automatically switches to followUp as necessary
     return
@@ -155,8 +178,8 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
   try {
     insertAllButtons();
   } catch (error) {
-    console.error("Failed to commit button data to db:");
-    console.error(error);
+    logError("Failed to commit button data to db:");
+    logError(error);
     // Roll back the sent message to avoid having buttons sitting around without db entries
     sentMessage.delete();
     await interactionReplySafely(interaction, "Failed to commit button mappings data to the database. See the bot logs for details.");
@@ -164,5 +187,6 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
   }
 
   // Finally reply
+  logAudit(`User ${interaction.user.globalName} (ID ${interaction.user.id}) created a button message in guild ${interaction.guild!.name} (ID ${interaction.guildId}).`)
   await interactionReplySafely(interaction, "Message sent.\n\nThe current editor data is still retained for sending additional copies of this message; use `/buttoneditor clear` to start afresh.");
 }

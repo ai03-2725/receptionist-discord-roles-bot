@@ -1,5 +1,8 @@
 import { ButtonInteraction, type CacheType } from "discord.js";
 import type { ButtonTableEntry } from "../ButtonHandler";
+import { EndInteractionSilently } from "./EndInteractionSilently";
+import { logError } from "../../../core/Log";
+import { makeInteractionPrintable } from "../../../util/MakeInteractionPrintable";
 
 // Checks the incoming interaction's guild, channel, and message ID against those recorded in the database to prevent source forgery
 // Returns a list of error strings - length 0 means verification success
@@ -23,17 +26,16 @@ export const verifySourceMatch: (interaction: ButtonInteraction<CacheType>, butt
 // Interaction handler that silently fails and reports source mismatch to console
 export const handleSourceMismatch = async (interaction: ButtonInteraction<CacheType>, buttonData: ButtonTableEntry, errorStrings: string[]) => {
 
-  console.error("Possible security breach: Mismatch found between button's recorded sent location and interaction's location.\nPerhaps is someone trying to forge a button press?\n")
+  logError("Possible security breach: Mismatch found between button's recorded sent location and interaction's location.\nPerhaps is someone trying to forge a button press?\n")
 
-  console.error("Discovered mismatches:")
+  logError("Discovered mismatches:")
   for (const errorString of errorStrings) {
-    console.error("- " + errorString)
+    logError("- " + errorString)
   }
-  console.error("\nButton details:")
-  console.error(JSON.stringify(buttonData, null, 2))
-  console.error("\nInteraction details:")
-  console.error(JSON.stringify(interaction, (key, value) => typeof value === "bigint" ? value.toString() : value, 2))
+  logError("\nButton details:")
+  logError(JSON.stringify(buttonData, null, 2))
+  logError("\nInteraction details:")
+  logError(makeInteractionPrintable(interaction))
 
-  await interaction.deferReply()
-  await interaction.deleteReply()
+  await EndInteractionSilently(interaction)
 }

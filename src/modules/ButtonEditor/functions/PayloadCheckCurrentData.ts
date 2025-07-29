@@ -23,7 +23,7 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
   }
 
   const replyContainer = new ContainerBuilder()
-    .setAccentColor(userData.containerColor ? Number('0x' + userData.containerColor) : 0xFFFFFF)
+    .setAccentColor(userData.containerColor ? Number('0x' + userData.containerColor) : 0x808080)
     .addTextDisplayComponents(
       textDisplay => textDisplay
         .setContent("**Current Editor Data**")

@@ -1,4 +1,5 @@
 import { type Role, type APIRole } from "discord.js";
+import { logDebug } from "../../../core/Log";
 
 export enum ButtonActionMappings {
   "ASSIGN" = 0,
@@ -39,7 +40,7 @@ export type EditorDataType = Map<string, ButtonEditorState>
 
 // Clear editor data for given user
 export const resetEditorDataForUser = (editorData: EditorDataType, userId: string) => {
-  console.log(`Initializing editor data for user ${userId}`);
+  logDebug(`Initializing editor data for user ${userId}`);
   editorData.set(userId, {...EMPTY_BUTTONEDITOR_STATE})
 }
 

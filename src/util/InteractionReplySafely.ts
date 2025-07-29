@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, MessageFlags, type Interaction, type InteractionReplyOptions } from "discord.js"
+import { logDebug, logError } from "../core/Log";
 
 
 // Replies to the given interaction (if possible).
@@ -13,10 +14,11 @@ export const interactionReplySafely = async (interaction: Interaction<any>, mess
     } else {
       await interaction.reply({content: message, flags: (ephemeral ? MessageFlags.Ephemeral : undefined)});
     }
+    logDebug("Replied to interaction.")
     return true;
   } catch (error) {
-    console.error("Failed to reply to interaction:");
-    console.error(error);
+    logError("Failed to reply to interaction:");
+    logError(error);
     return false;
   }
 }
@@ -33,10 +35,11 @@ export const interactionReplySafelyComponents = async (interaction: Interaction<
     } else {
       await interaction.reply({components: components, flags: MessageFlags.IsComponentsV2 | (ephemeral ? MessageFlags.Ephemeral : 0)});
     }
+    logDebug("Replied to interaction.")
     return true;
   } catch (error) {
-    console.error("Failed to reply to interaction:");
-    console.error(error);
+    logError("Failed to reply to interaction:");
+    logError(error);
     return false;
   }
 }

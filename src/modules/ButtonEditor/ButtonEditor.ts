@@ -18,6 +18,8 @@ import { setContainerColor } from "./functions/PayloadSetContainerColor";
 import { clearEditor } from "./functions/PayloadClearEditor";
 import type { Database } from "better-sqlite3";
 import { interactionReplySafely } from "../../util/InteractionReplySafely";
+import { logDebug, logInfo, logWarn } from "../../core/Log";
+import { makeInteractionPrintable } from "../../util/MakeInteractionPrintable";
 
 
 interface ButtonEditorParams extends ModuleParams {
@@ -36,11 +38,13 @@ export class ButtonEditor extends SpecializedCommandModule {
 
 
   constructor(params: ButtonEditorParams) {
+    logDebug("Initializing ButtonEditor.")
     super(params);
     this.editorData = new Map();
 
     // Make sure the required table exists on the db
     this.db = params.db;
+    logDebug("Creating table buttons in the database if not exists.")
     this.db.exec(
       `CREATE TABLE IF NOT EXISTS buttons(
         button_id TEXT PRIMARY KEY,
@@ -54,6 +58,7 @@ export class ButtonEditor extends SpecializedCommandModule {
     );
 
     // Register the /buttoneditor command and its subcommands
+    logDebug("Adding command /buttoneditor to commands list.")
     this.commands.push(new SlashCommandBuilder()
         .setName("buttoneditor")
         .setDescription("Create a role button message.")
@@ -136,15 +141,20 @@ export class ButtonEditor extends SpecializedCommandModule {
 
 
     // Interaction handling
+    logDebug("Adding interaction handler.")
     this.client.on(Events.InteractionCreate, async interaction => {
 
       // Commands handling
       // All button editor commands are a subcommand of /buttoneditor, so only respond to that
       if (interaction.isChatInputCommand() && interaction.commandName == "buttoneditor") {
 
+        logDebug("Button editor: Received the following interaction.")
+        logDebug(makeInteractionPrintable(interaction))
+
         // Only allow running in guild text channels; sanity-check its existence
         const activeChannel = interaction.channel?.type === ChannelType.GuildText ? interaction.channel : null;
         if (!activeChannel) {
+          logDebug("Interaction came from a non-text channel; stopping.")
           await interactionReplySafely(interaction, 'This command can only be run in text channels.');
           return
         }
@@ -159,33 +169,41 @@ export class ButtonEditor extends SpecializedCommandModule {
         // Switch behavior based on subcommand
         switch(subcommand) {
           case "setbody":
+            logDebug("Handling /buttoneditor setbody.")
             await setBody(this.editorData, interaction);
             break;
           case "setcontainercolor":
+            logDebug("Handling /buttoneditor setcontainercolor.")
             await setContainerColor(this.editorData, interaction);
             break;
           case "addbutton":
+            logDebug("Handling /buttoneditor addbutton.")
             await addButton(this.editorData, interaction);
             break;
           case "removebutton":
+            logDebug("Handling /buttoneditor removebutton.")
             await removeButton(this.editorData, interaction);
             break;
           case "status":
+            logDebug("Handling /buttoneditor status.")
             await checkCurrentData(this.editorData, interaction);
             break;
           case "deploy":
+            logDebug("Handling /buttoneditor deploy.")
             await deployMessage(this.editorData, interaction, this.db);
             break;
           case "clear":
+            logDebug("Handling /buttoneditor clear.")
             await clearEditor(this.editorData, interaction);
             break;
           default:
+            logWarn(`Button editor: Received unknown subcommand "/buttoneditor ${subcommand}".`)
             await interactionReplySafely(interaction, `\`/buttoneditor\`: Unknown subcommand "${subcommand}".`);
             return
         }
 
       }
     })
-
+    logDebug("ButtonEditor initialized successfully.")
   }
 }

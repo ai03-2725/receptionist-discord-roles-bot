@@ -31,10 +31,7 @@ Please wait for a stable release.
 ---
 
 # Todo
-- Provide feedback on each edit command
 - Add prune support to clean up obsolete database entries
-- Cleanup logging, add logging where useful
-- Add bot config options (bot owner IDs for global prune permissions, log level)
 - Docker containerize
 - Document installation process
 
