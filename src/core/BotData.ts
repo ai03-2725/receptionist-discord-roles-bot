@@ -28,7 +28,7 @@ export const loadBotDataJson = () => {
     console.warn("Did not find a ./data/bot-data.json - creating one now.")
     console.warn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.json is being retained properly.")
     try {
-      writeFileSync('./data/bot-data.json', JSON.stringify(DEFAULT_DATA_JSON, null, 2), 'utf-8');
+      updateBotDataJson(DEFAULT_DATA_JSON)
     } catch (error) {
       console.error("Could not write a default ./data/bot-data.json for storing necessary data.")
       process.exit(1);
@@ -66,7 +66,7 @@ export const loadBotDataJson = () => {
 
 export const updateBotDataJson = (botData: BotDataJson) => {
   try {
-    writeFileSync('./data/bot-data.json', JSON.stringify(botData), 'utf-8');
+    writeFileSync('./data/bot-data.json', JSON.stringify(botData, null, 2), 'utf-8');
     console.log("Bot data at ./data/bot-data.json written successfully.")
   } catch (error) {
     console.error("Could not write bot config to ./data/bot-data.json.");
