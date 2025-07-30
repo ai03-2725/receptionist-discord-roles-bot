@@ -105,18 +105,18 @@ export class ButtonHandler extends Module {
               await ConditionallyReply(interaction, `You already don't have the role <@&${roleToAssign.id}>.`, parsedButton.buttonData.silent)
             } else {
               await member.roles.remove(roleToAssign)
-              logAudit(`Removed role ${roleToAssign.name} (ID ${roleToAssign.id}) to user ${member.user.globalName} (ID ${member.id}).`)
+              logAudit(`Removed role ${roleToAssign.name} (ID ${roleToAssign.id}) from user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Removed role <@&${roleToAssign.id}>.`, parsedButton.buttonData.silent)
             }
             break;
           case ButtonActionMappings.TOGGLE:
             if (memberAlreadyHasRole) {
               await member.roles.remove(roleToAssign)
-              logAudit(`Toggle-removed role ${roleToAssign.name} (ID ${roleToAssign.id}) for user ${member.user.globalName} (ID ${member.id}).`)
+              logAudit(`Toggle-removed role ${roleToAssign.name} (ID ${roleToAssign.id}) from user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Removed role <@&${roleToAssign.id}>.`, parsedButton.buttonData.silent)
             } else {
               await member.roles.add(roleToAssign)
-              logAudit(`Toggle-enabled role ${roleToAssign.name} (ID ${roleToAssign.id}) for user ${member.user.globalName} (ID ${member.id}).`)
+              logAudit(`Toggle-assigned role ${roleToAssign.name} (ID ${roleToAssign.id}) to user ${member.user.globalName} (ID ${member.id}).`)
               await ConditionallyReply(interaction, `Assigned role <@&${roleToAssign.id}>.`, parsedButton.buttonData.silent)
             }
             break;
