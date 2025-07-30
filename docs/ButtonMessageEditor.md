@@ -2,7 +2,7 @@
 
 This module/set of commands allows for creating and deploying messages with role-assigning buttons attached below.
 
-
+<img alt="Button message example" src="./images/button-message-example-1.png" width="50%" />
 
 ### Commands 
 - `/buttoneditor setbody` - Sets the body text of the button message currently being created.
