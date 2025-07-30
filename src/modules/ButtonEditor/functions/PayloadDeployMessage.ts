@@ -25,7 +25,7 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
   for (const chunk of splitButtons) {
     const currentActionRow = new ActionRowBuilder()
     for (const button of chunk) {
-      const buttonBuilder = new ButtonBuilder().setStyle(ButtonStyle.Primary);
+      const buttonBuilder = new ButtonBuilder().setStyle(button.style);
       if (button.label) {
         buttonBuilder.setLabel(button.label)
       }

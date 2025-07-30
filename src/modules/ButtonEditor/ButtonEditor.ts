@@ -99,6 +99,17 @@ export class ButtonEditor extends SpecializedCommandModule {
             .setDescription("Whether or not the bot should skip notifying the user after modifying the role.")
             .setRequired(false)
           )
+          .addStringOption(option => option
+            .setName("color")
+            .setDescription("The color of the button. Defaults to blue.")
+            .setRequired(false)
+            .addChoices(
+              {name: "Blue", value: "PRIMARY"},
+              {name: "Grey", value: "SECONDARY"},
+              {name: "Green", value: "SUCCESS"},
+              {name: "Red", value: "DANGER"}
+            )
+          )
         )
         .addSubcommand(subcommand => subcommand
           .setName("removebutton")

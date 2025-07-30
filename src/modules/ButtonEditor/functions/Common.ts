@@ -1,4 +1,4 @@
-import { type Role, type APIRole } from "discord.js";
+import { type Role, type APIRole, ButtonStyle } from "discord.js";
 import { logDebug, logError, logWarn } from "../../../core/Log";
 import { encodePublicInteractionCustomId, parseCustomIdPublicInteractionType, PublicInteractionCategory } from "../../../util/CustomIDEncodings";
 
@@ -13,7 +13,8 @@ type ButtonEntry = {
   label: string | undefined,
   role: Role | APIRole,
   action: ButtonActionMappings,
-  silent: boolean
+  silent: boolean,
+  style: ButtonStyle
 }
 
 

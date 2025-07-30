@@ -19,7 +19,7 @@ export const checkCurrentData = async (editorData: EditorDataType, interaction: 
   }
   for (const [index, button] of userData.buttons.entries()) {
     const actionStringForButton = Object.entries(ButtonActionMappings).find(entry => entry[1] == button.action)![0]
-    buttonsString += `\n\n*ID ${index}:*\nLabel: ${button.label ? `"${button.label}"` : "None"}; Emote: ${button.emote ? `"${button.emote}"` : "None"}\nRole: ${button.role.name} (ID ${button.role.id}); Action: ${actionStringForButton}; Silent: ${button.silent}`
+    buttonsString += `\n\n*ID ${index}:*\nLabel: ${button.label ? `"${button.label}"` : "None"}; Emote: ${button.emote ? `"${button.emote}"` : "None"}\nRole: ${button.role.name} (ID ${button.role.id}); Action: ${actionStringForButton}\nSilent: ${button.silent}; Style ID: ${button.style}`
   }
 
   const replyContainer = new ContainerBuilder()

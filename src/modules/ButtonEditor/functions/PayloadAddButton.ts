@@ -1,4 +1,4 @@
-import { type ChatInputCommandInteraction, MessageFlags, type Role, type APIRole, ContainerBuilder } from "discord.js";
+import { type ChatInputCommandInteraction, MessageFlags, type Role, type APIRole, ContainerBuilder, ButtonStyle } from "discord.js";
 import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } from "./Common";
 import { interactionReplySafely, interactionReplySafelyComponents } from "../../../util/InteractionReplySafely";
 import { checkIfValidEmoji } from "../../../util/CheckIfValidEmoji";
@@ -40,6 +40,23 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
     }
     logDebug(`Emote ${emote} verified as valid.`)
   }
+
+  let buttonColor: ButtonStyle;
+  const buttonColorOptString = interaction.options.getString('color');
+  switch (buttonColorOptString) {
+    case "SECONDARY":
+      buttonColor = ButtonStyle.Secondary;
+      break;
+    case "SUCCESS":
+      buttonColor = ButtonStyle.Success;
+      break;
+    case "DANGER":
+      buttonColor = ButtonStyle.Danger;
+      break;
+    default:
+      buttonColor = ButtonStyle.Primary;
+      break;
+  }
   
   // Sanity checks passed, push button onto editor data
   userData.buttons.push({
@@ -47,7 +64,8 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
     label: label || undefined,
     role: <Role | APIRole>interaction.options.getRole('role'), // Guaranteed to exist since it's a required role option field
     action: ButtonActionMappings[<"ASSIGN" | "REMOVE" | "TOGGLE">interaction.options.getString('action')], // Guaranteed to be one of these three since it's a required choice field
-    silent: interaction.options.getBoolean('silent') || false
+    silent: interaction.options.getBoolean('silent') || false,
+    style: buttonColor
   })
   logDebug(`Added button to user ${interaction.user.globalName}'s editor data.`)
 
@@ -73,7 +91,8 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
 - Role: <@&${interaction.options.getRole('role')!.id}>
 - Label: ${label ? `\`${label}\`` : "None"}
 - Emote: ${emote ? emote : "None"}
-- Silent: ${interaction.options.getBoolean('silent')}`),
+- Silent: ${interaction.options.getBoolean('silent')}
+- Color/Style: \`${buttonColorOptString}\``),
     )
 
   await interactionReplySafelyComponents(interaction, [replyContainer]);
