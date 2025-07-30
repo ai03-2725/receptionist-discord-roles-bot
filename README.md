@@ -1,5 +1,32 @@
-# Receptionist
-A simple Discord bot for self-role-assigning.
+# Receptionist (v1.0.x Archive)
+A simple Discord bot for self-role-assigning.  
+Archive branch for the v1 revision bot.
+
+### Details
+v1.0.x operated using the following process:  
+1. Each button was assigned a UUID custom ID for sending to Discord.
+2. The corresponding button actions (role to assign, action such as assign/remove/toggle, etc.) were stored in a SQLite database along with the location of the button (guild ID, channel ID, message ID).
+3. Upon receiving a button press event, the button's UUID was pulled from the event and queried for in the database.
+4. The corresponding row was fetched from the database, and its source (guild ID/channel ID) was cross-checked against the interaction event to confirm a match (to avoid spoofing/exploits).
+5. The role to assign and actions to take were parsed from the database row, and then executed in the corresponding guild.
+  
+This process while straightforward had major drawbacks:  
+- There was significant latency in resolving the IDs stored in the database back to the real-world guild/channel/role objects for operating upon, along with the latency of the query itself.
+- The above also added significant complexity to the functioning of the bot.
+- The database and Discord-side messages could de-sync due to button messages being deleted, roles/guilds/channels being removed, bot-side crashes leaving the message sent but database-side uncommitted (due to needing to send the message first to obtain its ID for storing in the DB), etc.
+- A prune command was added to lookup all entries in the database, verify that their bound messages still exist, and remove any orphaned entries; however, this process took extremely long (roughly 1 second per button) due to needing to fetch the message from the channel from the guild to confirm their existence.
+
+As such, v1.1.x shifted to a different process:
+- Each button's actions and role involved are encoded to be the button's custom ID itself, removing the need for a database.
+- On receiving a button press event, the custom ID of the button is parsed back into the intended button actions and executed, significantly reducing latency.
+- This minimizes de-syncing of two datasets due to the buttons themselves being the single source of truth - the functionality of the button solely relies on the existence of the button (i.e. its message not being deleted) and the referenced role existing.
+
+This SQLite-based v1.0.x variant is archived mainly as a proof-of-concept of a database-based implementation.
+
+
+
+  
+  
 
 <img alt="Button message example" src="./docs/images/button-message-example-2.png" width="50%" />
 
