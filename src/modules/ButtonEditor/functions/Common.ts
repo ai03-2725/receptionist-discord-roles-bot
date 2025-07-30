@@ -41,7 +41,7 @@ export type EditorDataType = Map<string, ButtonEditorState>
 // Clear editor data for given user
 export const resetEditorDataForUser = (editorData: EditorDataType, userId: string) => {
   logDebug(`Initializing editor data for user ${userId}`);
-  editorData.set(userId, {...EMPTY_BUTTONEDITOR_STATE})
+  editorData.set(userId, structuredClone(EMPTY_BUTTONEDITOR_STATE))
 }
 
 
