@@ -3,6 +3,7 @@ A simple Discord bot for self-role-assigning.
 
 ## Currently under construction
 Please wait for the next stable release.
+For more details, see the next revision details in [the v1.0.x readme](https://github.com/ai03-2725/receptionist-discord-roles-bot/blob/v1.0.x/README.md).
 
 <img alt="Button message example" src="./docs/images/button-message-example-2.png" width="50%" />
 
