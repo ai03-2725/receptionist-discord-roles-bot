@@ -67,7 +67,6 @@ export const initUserDataIfNecessary = (editorData: EditorDataType, userId: stri
 //     - Rest - Target role ID
 
 type RoleButtonIdDataBlockContents = {
-  revision: number,
   deduplicationId: number,
   actionType: ButtonActionMappings, 
   silent: boolean
@@ -80,7 +79,6 @@ const parseRoleButtonIdDataBlock: (dataBlock: string) => null | RoleButtonIdData
   switch(revision) {
     case "00": 
       // Chars 0~1 = Revision identifier (0)
-      dataBlockParsed.revision = 0;
 
       // Chars 2~3 = Deduplication ID
       const dedupId = dataBlock.slice(2, 4)
@@ -152,7 +150,7 @@ export const decodeCustomIdToRoleButton: (id: string) => null | {buttonData: Rol
 }
 
 // Encode a button's custom ID
-export const encodeRoleButtonCustomId = (buttonData: RoleButtonIdDataBlockContents, roleId: string) => {
+export const encodeRoleButtonCustomId: (buttonData: RoleButtonIdDataBlockContents, roleId: string) => string | null = (buttonData, roleId) => {
 
   // Build data string
   // Start off with current encoding revision ID (00)

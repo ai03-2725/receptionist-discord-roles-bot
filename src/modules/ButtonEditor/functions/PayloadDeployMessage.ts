@@ -1,6 +1,6 @@
 import { ActionRowBuilder, type AnyComponentBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, ChatInputCommandInteraction, MessageFlags, ChannelType, Message } from "discord.js";
 import { splitArrayIntoChunks } from "../../../util/SplitArrayIntoChunks";
-import { ButtonActionMappings, type EditorDataType, initUserDataIfNecessary } from "./Common";
+import { ButtonActionMappings, type EditorDataType, encodeRoleButtonCustomId, initUserDataIfNecessary } from "./Common";
 import { v7 as uuidv7 } from "uuid";
 import type { Database } from "better-sqlite3";
 import { interactionReplySafely } from "../../../util/InteractionReplySafely";
@@ -14,15 +14,16 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
   const userData = editorData.get(userId)!
 
   // Handle buttons
-  // Create action rows and button-ID-to-role mappings
   let buttonRows: ActionRowBuilder<AnyComponentBuilder>[] = []
-  let idToRoleMappings: Map<string, {role: string, action: ButtonActionMappings, silent: boolean}> = new Map()
 
   // Each ActionRow can have up to 5 elements
   // Split buttons array into chunks of 5 each
   const splitButtons = splitArrayIntoChunks(userData.buttons, 5);
   logDebug("Button data:")
   logDebug(splitButtons)
+
+  // Maintain an incremental button ID across the nested loops
+  let currentButtonId = 0;
   for (const chunk of splitButtons) {
     const currentActionRow = new ActionRowBuilder()
     for (const button of chunk) {
@@ -33,13 +34,20 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
       if (button.emote) {
         buttonBuilder.setEmoji(button.emote)
       }
-      // Generate UUID for this button (used for button-to-role mappings later)
-      const mappingUuid = uuidv7();
-      buttonBuilder.setCustomId(mappingUuid)
+      // Generate custom ID
+      const customId = encodeRoleButtonCustomId({
+        deduplicationId: currentButtonId,
+        actionType: button.action,
+        silent: button.silent
+      }, button.role.id)
+      if (!customId) {
+        throw new Error("Custom ID failed to generate.") //TODO: Handle more gracefully
+      }
+      buttonBuilder.setCustomId(customId)
       // Add this button to the current action row
       currentActionRow.addComponents(buttonBuilder)
-      // Also add this mapping to the mappings table
-      idToRoleMappings.set(mappingUuid, {role: button.role.id, action: button.action, silent: button.silent})
+      // Increment the button ID
+      currentButtonId += 1;
     }
     // Once all buttons of the chunk have been processed, add the action row to the list of action rows
     buttonRows.push(currentActionRow)
@@ -58,19 +66,16 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
     mainDisplayComponents.push(container)
   } else {
     const textDisplay = new TextDisplayBuilder()
-      .setContent(userData.body!)
+      .setContent(userData.body)
     mainDisplayComponents.push(textDisplay)
   }
 
   logDebug("Message building completed.")
   logDebug("Message components:")
   logDebug(mainDisplayComponents.concat(buttonRows))
-  logDebug("ID to role mappings:")
-  logDebug(idToRoleMappings)
 
   return {
     components: mainDisplayComponents.concat(buttonRows),
-    idToRoleMappings: idToRoleMappings,
   }
 }
 
@@ -153,37 +158,8 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
     logError(messageData)
     logError("Interaction details:")
     logError(makeInteractionPrintable(interaction))
-    const replySuccess = await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.\n\nMake sure that the bot has permissions to send messages in this channel.")
-    //replySuccess && await interactionReplySafely(interaction, `\`\`\`${JSON.stringify(error)}\`\`\``); // interactionReplySafely automatically switches to followUp as necessary
+    await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.\n\nMake sure that the bot has permissions to send messages in this channel.")
     return
-  }
-
-  // Now that the sent message is stored in sentMessage, its ID can be logged into the DB
-  const insertButton = db.prepare(`INSERT INTO buttons VALUES (@buttonId, @role, @action, @silent, @guildId, @channelId, @messageId)`);
-
-  const insertAllButtons = db.transaction(() => {
-    messageData.idToRoleMappings.forEach((value, key) => {
-      insertButton.run({
-        buttonId: key,
-        role: value.role,
-        action: value.action,
-        silent: value.silent ? 1 : 0,
-        guildId: interaction.guildId,
-        channelId: interaction.channelId,
-        messageId: sentMessage.id
-      })
-    })
-  });
-
-  try {
-    insertAllButtons();
-  } catch (error) {
-    logError("Failed to commit button data to db:");
-    logError(error);
-    // Roll back the sent message to avoid having buttons sitting around without db entries
-    sentMessage.delete();
-    await interactionReplySafely(interaction, "Failed to commit button mappings data to the database. See the bot logs for details.");
-    return;
   }
 
   // Finally reply
