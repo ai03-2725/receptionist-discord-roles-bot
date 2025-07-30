@@ -8,7 +8,8 @@ import { logDebug } from "../../../core/Log";
 export const setBody = async (editorData: EditorDataType, interaction: ChatInputCommandInteraction) => {
   initUserDataIfNecessary(editorData, interaction.user.id)
   const userData = editorData.get(interaction.user.id)!
-  const body = interaction.options.getString('text')!; // Required field
+  let body = interaction.options.getString('text')!; // Required field
+  body = body.replaceAll(/\\n/g, "\n") // Make \n function as newlines
   userData.body = body;
   logDebug(`Updated body text for ${interaction.user.globalName}'s editorData.`);
 

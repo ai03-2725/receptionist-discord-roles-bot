@@ -9,6 +9,7 @@ import type { Guild } from "discord.js"
 //   - Snowflakes are continuously growing, so for now just make sure it's a number
 // Stock: Registers as an unicode char - seems to match with a "\p{Extended_Pictographic}" regex
 //   - Based on further testing, stuff like :regional_indicator_[a-z]: require the "\p{Emoji_Presentation}" check
+//   - Based on further testing, the above two don't match simpler emoji such as :one:; opt for \p{Emoji} instead
 
 // Can pass an optional guild parameter to check if the emoji actually exists in the guild
 
@@ -34,7 +35,7 @@ export const checkIfValidEmoji = async (input: string, guild: Guild | undefined 
     }
   } 
   // Then check unicode match
-  else if (/^\p{Emoji_Presentation}|\p{Extended_Pictographic}$/u.test(input)) {
+  else if (/^\p{Emoji}$/u.test(input)) {
     return true
   } 
   // If both fail, not an emoji
