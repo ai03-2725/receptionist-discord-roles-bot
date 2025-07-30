@@ -23,7 +23,7 @@ As such, v1.1.x shifted to a different process:
 
 This SQLite-based v1.0.x variant is archived mainly as a proof-of-concept of a database-based implementation.
 
-
+---
 
   
   
