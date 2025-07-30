@@ -2,7 +2,6 @@ import {
   ChannelType,
   Events, 
   InteractionContextType, 
-  MessageFlags, 
   PermissionFlagsBits, 
   SlashCommandBuilder} from "discord.js";
 import { type ModuleParams } from "../../structures/BaseModules";
@@ -16,9 +15,8 @@ import { removeButton } from "./functions/PayloadRemoveButton";
 import { setBody } from "./functions/PayloadSetBody";
 import { setContainerColor } from "./functions/PayloadSetContainerColor";
 import { clearEditor } from "./functions/PayloadClearEditor";
-import type { Database } from "better-sqlite3";
 import { interactionReplySafely } from "../../util/InteractionReplySafely";
-import { logDebug, logInfo, logWarn } from "../../core/Log";
+import { logDebug, logWarn } from "../../core/Log";
 import { makeInteractionPrintable } from "../../util/MakeInteractionPrintable";
 
 

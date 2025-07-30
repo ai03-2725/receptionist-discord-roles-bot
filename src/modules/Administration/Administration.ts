@@ -1,11 +1,7 @@
-import { Database } from "better-sqlite3";
 import { logDebug } from "../../core/Log";
 import { ModuleParams } from "../../structures/BaseModules";
 import { SpecializedCommandModule } from "../../structures/SpecializedCommandModule";
-import { Events, InteractionContextType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
-import { queryAndPrune } from "./functions/QueryAndPrune";
-import { getBotOwnerIds } from "../../core/EnvVars";
-import { interactionReplySafely } from "../../util/InteractionReplySafely";
+import { Events } from "discord.js";
 
 
 interface AdministrationModuleParams extends ModuleParams {

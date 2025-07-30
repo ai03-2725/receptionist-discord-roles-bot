@@ -1,11 +1,9 @@
-import type { Database } from "better-sqlite3";
 import { Module, type ModuleParams } from "../../structures/BaseModules";
-import { Events, MessageFlags } from "discord.js";
-import { handleSourceMismatch, verifySourceMatch } from "./functions/SourceMismatchReporter";
+import { Events } from "discord.js";
 import { ButtonActionMappings, decodeCustomIdToRoleButton } from "../ButtonEditor/functions/Common";
 import { ConditionallyReply } from "./functions/ConditionallyReply";
 import { interactionReplySafely } from "../../util/InteractionReplySafely";
-import { logAudit, logDebug, logError, logInfo } from "../../core/Log";
+import { logAudit, logDebug, logError } from "../../core/Log";
 import { makeInteractionPrintable } from "../../util/MakeInteractionPrintable";
 
 

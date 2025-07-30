@@ -1,8 +1,6 @@
 import { ActionRowBuilder, type AnyComponentBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, TextDisplayBuilder, ChatInputCommandInteraction, MessageFlags, ChannelType, Message } from "discord.js";
 import { splitArrayIntoChunks } from "../../../util/SplitArrayIntoChunks";
-import { ButtonActionMappings, type EditorDataType, encodeRoleButtonCustomId, initUserDataIfNecessary } from "./Common";
-import { v7 as uuidv7 } from "uuid";
-import type { Database } from "better-sqlite3";
+import { type EditorDataType, encodeRoleButtonCustomId, initUserDataIfNecessary } from "./Common";
 import { interactionReplySafely } from "../../../util/InteractionReplySafely";
 import { logAudit, logDebug, logError } from "../../../core/Log";
 import { makeInteractionPrintable } from "../../../util/MakeInteractionPrintable";

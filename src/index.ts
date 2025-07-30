@@ -4,10 +4,10 @@ import {
   GatewayIntentBits,
   SharedSlashCommand,
 } from "discord.js";
-import {
-  existsSync,
-} from 'fs';
-import Database from 'better-sqlite3';
+// import {
+//   existsSync,
+// } from 'fs';
+//import Database from 'better-sqlite3';
 
 import type { CommandModule, Module } from "./structures/BaseModules";
 import { PingHandler } from "./modules/PingHandler/PingHandler";
@@ -18,7 +18,7 @@ import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
 import { getAppToken, loadEnvVars } from "./core/EnvVars";
 import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
 import { logDebug, logError, logInfo, LogLevel, logWarn } from "./core/Log";
-import { AdministrationModule } from "./modules/Administration/Administration";
+//import { AdministrationModule } from "./modules/Administration/Administration";
 
 
 logInfo(`Starting bot instance.`);
