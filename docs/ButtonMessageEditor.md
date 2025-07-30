@@ -39,5 +39,5 @@ This module/set of commands allows for creating and deploying messages with role
 The above would create a message with a button which would toggle the `@Testing` role on press.
 
 ### Tips
-- Discord mobile allows for entering multiline text into text options of slash commands.
+- Discord mobile allows for entering multiline text into text options of slash commands.  
   Use this to enter multi-line body text when using `/buttoneditor setbody`.
