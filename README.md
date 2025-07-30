@@ -1,6 +1,9 @@
 # Receptionist
 A simple Discord bot for self-role-assigning.
 
+## Currently under construction
+Please wait for the next stable release.
+
 <img alt="Button message example" src="./docs/images/button-message-example-2.png" width="50%" />
 
 ### Features
