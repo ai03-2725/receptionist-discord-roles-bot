@@ -1,9 +1,7 @@
 import { Database } from "better-sqlite3"
-import { Channel, Client, Guild, Message } from "discord.js"
+import { Channel, Client, Guild, Message, Sweepers } from "discord.js"
 import { ButtonTableEntry } from "../../ButtonHandler/ButtonHandler"
-import { sleep } from "../../../util/Sleep";
-import { logError } from "../../../core/Log";
-import { interactionReplySafely } from "../../../util/InteractionReplySafely";
+import { logAudit, logDebug, logError } from "../../../core/Log";
 
 // Returns true if entry should be kept
 // Returns false if entry should be removed
@@ -14,6 +12,8 @@ const checkEntry = async (
   guildsMap: Map<string, Guild | null>,
   channelsMap: Map<string, (Channel | null)>
 ) => {
+  logDebug(`Checking entry ${dbEntry.button_id}`)
+
   // First attempt to resolve the guild of this entry
   let guild: Guild;
 
@@ -29,8 +29,6 @@ const checkEntry = async (
       // The guild fetch will fail if the bot is no longer a member of the guild
       guild = null;
     }
-    // Sleep in case this was a fresh access to Discord API - avoid ramming into the rate limit
-    await sleep(50);
     // Store this guild into the cache
     guildsMap.set(dbEntry.guild_id, guild)
   }
@@ -38,8 +36,10 @@ const checkEntry = async (
   // Handle cases where the guild is null (bot has been removed
   if (!guild) {
     if (purgeOldServers) {
+      logAudit(`Marking button ID ${dbEntry.button_id} for deletion - guild is nonexistent and purgeOldServers is true`)
       return false
     } else {
+      logDebug(`Marking for keeping - guild is nonexistent and purgeOldServers is false`)
       return true
     }
   }
@@ -47,6 +47,7 @@ const checkEntry = async (
   // Make sure the guild is online/accessible before continuing further
   if (!guild.available) {
     // Pass for now since can't verify anything further
+    logDebug(`Marking for keeping - guild is unavailable and cannot be tested further`)
     return true
   }
 
@@ -62,12 +63,12 @@ const checkEntry = async (
     } catch (error) {
       channel = null;
     }
-    await sleep(50);
     channelsMap.set(dbEntry.channel_id, channel)
   }
 
   if (!channel) {
     // If channel no longer exists, messages aren't recoverable so remove them
+    logAudit(`Marking button ID ${dbEntry.button_id} for deletion - channel is nonexistent`)
     return false
   }
 
@@ -82,17 +83,32 @@ const checkEntry = async (
   } catch (error) {
     message = null;
   }
-  await sleep(50);
 
   // If message still exists, return true
   // If dne, return false
-  return !!message;
+  if (!message) {
+    logAudit(`Marking button ID ${dbEntry.button_id} for deletion - message is nonexistent`);
+    return false
+  } else {
+    logDebug(`Marking for keeping - message exists`);
+    return true
+  }
 
 }
 
 // Runs the prune operations
 // Returns the number of affected entries
 export const queryAndPrune = async (client: Client, db: Database, guild: Guild | null, purgeOldServers: boolean) => {
+
+  logAudit(`Running prune ${guild ? `on guild "${guild.name}" (ID ${guild.id})` : "globally"}`)
+
+  // Invalidate message cache since it can hold desynced/obsolete data
+  if (!guild) {
+    client.sweepers.sweepMessages(() => true)
+  } else {
+    client.sweepers.sweepMessages((value, key, collection) => value.guildId === guild.id)
+  }
+  
 
   // Create a cache of guilds and channels to avoid excess access to Discord's API
   // Null = guild/channel was deleted
@@ -128,6 +144,7 @@ export const queryAndPrune = async (client: Client, db: Database, guild: Guild |
   const buttonsDeleteStatement = db.prepare('DELETE FROM buttons WHERE (button_id = @button_id AND guild_id = @guild_id)')
   const pruneAllButtonEntries = db.transaction((entries: ButtonTableEntry[]) => {
     for (const entry of entries) {
+      logAudit(`Pruning button entry ID ${entry.button_id}`)
       const queryResults = buttonsDeleteStatement.run(entry)
       if (queryResults.changes !== 1) {
         logError(`Rows affected in a delete query was ${queryResults.changes} rather than 1 during a prune.`)
@@ -145,8 +162,9 @@ export const queryAndPrune = async (client: Client, db: Database, guild: Guild |
     logError(error)
     return -1
   }
+
+  logAudit(`Prune ${guild ? `on guild "${guild.name}" (ID ${guild.id})` : "on all guilds"} completed`)
   
   return buttonEntriesToRemove.length
-
 
 }

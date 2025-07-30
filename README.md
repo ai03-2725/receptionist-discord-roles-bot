@@ -30,6 +30,5 @@ Please wait for a stable release.
 ---
 
 ## Planned/Todo
-- Add prune support to clean up obsolete database entries
 - Role assign dropdown menus
 

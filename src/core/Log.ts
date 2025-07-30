@@ -16,8 +16,11 @@ const writePrefix = (level: LogLevel) => {
       process.stdout.write(`${new Date().toISOString()} [${LogLevel[level]}] `)  
       break;
     case LogLevel.AUDIT:
-      if (!getLogAudit()) return;
-      process.stdout.write(`${new Date().toISOString()} [${LogLevel[level]}] `)  
+      if (getLogDebug() || getLogAudit()) {
+        process.stdout.write(`${new Date().toISOString()} [${LogLevel[level]}] `)  
+      } else {
+        return;
+      }
       break;
     case LogLevel.INFO:
       process.stdout.write(`${new Date().toISOString()} [${LogLevel[level]}] `)  

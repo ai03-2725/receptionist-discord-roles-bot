@@ -18,6 +18,7 @@ import { pushSlashCommandsIfNecessary } from "./core/PushSlashCommands";
 import { getAppToken, loadEnvVars } from "./core/EnvVars";
 import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
 import { logDebug, logError, logInfo, LogLevel, logWarn } from "./core/Log";
+import { AdministrationModule } from "./modules/Administration/Administration";
 
 // Load environment variables
 loadEnvVars()
@@ -53,6 +54,7 @@ logDebug("Loading modules with commands")
 const commandModules: CommandModule[] = []
 commandModules.push(new PingHandler({client: client}));
 commandModules.push(new ButtonEditor({client: client, db: db}));
+commandModules.push(new AdministrationModule({client: client, db:db}))
 
 // Non-command modules - these will not be queried for their commands
 logDebug("Loading modules without commands")
