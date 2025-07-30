@@ -98,6 +98,6 @@ const shutdown = (cause: "SIGTERM" | "SIGINT" | "uncaughtException") => {
   process.exit(cause === "uncaughtException" ? 1 : 0);
 }
 process
-  .on('SIGTERM', shutdown('SIGTERM'))
-  .on('SIGINT', shutdown('SIGINT'))
-  .on('uncaughtException', shutdown('uncaughtException'));
+  .on('SIGTERM', () => shutdown('SIGTERM'))
+  .on('SIGINT', () => shutdown('SIGINT'))
+  .on('uncaughtException', () => shutdown('uncaughtException'));
