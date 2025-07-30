@@ -23,9 +23,10 @@ Please wait for a stable release.
 
 --- 
  
-### Docs/How-to
+### Docs/Commands/How-to
 - [Installation and Setup](./docs/Setup.md)
 - [Button Message Editor](./docs/ButtonMessageEditor.md)
+- [Administration](./docs/Administration.md)
 
 ---
 
