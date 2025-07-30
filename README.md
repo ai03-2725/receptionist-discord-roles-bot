@@ -31,6 +31,11 @@ For more details, see the next revision details in [the v1.0.x readme](https://g
 
 ---
 
-## Planned/Todo
-- Role assign dropdown menus
+## Todo
+- Remove SQLite db for now
+- Encode button behavior into buttons
+- Mutually exclusive role assignment
+
+## Planned
+- Role assignment dropdown messages
 
