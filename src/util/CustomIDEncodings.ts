@@ -64,7 +64,7 @@ const parseCustomIdPrefix: (id: string) => null | {prefix: EncodedCustomIdPrefix
 // Otherwise returns the PublicInteractionCategory corresponding to the interaction
 export const parseCustomIdPublicInteractionType: (id: string) => null | {interactionType: PublicInteractionCategory, idRest: string[]} = (id) => {
   const customIdDetails = parseCustomIdPrefix(id)
-  console.log(customIdDetails)
+  logDebug(customIdDetails)
   if (!customIdDetails || customIdDetails.prefix !== EncodedCustomIdPrefixes.Public) return null
   logDebug("Parsing public interaction type")
   logDebug(customIdDetails.idRest)
