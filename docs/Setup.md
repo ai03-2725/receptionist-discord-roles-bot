@@ -37,7 +37,7 @@ At this point, your Discord app should open, and you should be able to add the b
    ```
    services:
      receptionist:
-       image: TODO
+       image: ghcr.io/ai03-2725/receptionist-discord-roles-bot:latest
        container_name: receptionist
        restart: unless-stopped
        environment:

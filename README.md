@@ -1,11 +1,6 @@
 # Receptionist
 A simple Discord bot for self-role-assigning.
 
-
-### Currently in progress
-Please wait for a stable release.  
-
-
 ### Features
 - Role-Assigning Buttons
   - Create messages with role-assigning buttons using simple commands
