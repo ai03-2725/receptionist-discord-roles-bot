@@ -120,7 +120,7 @@ const sanityCheckData: (editorData: EditorDataType, userId: string) => { success
 
 
 // Sends the assembled message if possible
-export const deployMessage = async (editorData: EditorDataType, interaction: ChatInputCommandInteraction, db: Database) => {
+export const deployMessage = async (editorData: EditorDataType, interaction: ChatInputCommandInteraction) => {
   // First sanity check the current data
   const sanityCheckResult = sanityCheckData(editorData, interaction.user.id)
   if (!sanityCheckResult.success) {

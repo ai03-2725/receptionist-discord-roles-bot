@@ -56,7 +56,7 @@ const client = new Client({
 logDebug("Loading modules with commands")
 const commandModules: CommandModule[] = []
 commandModules.push(new PingHandler({client: client}));
-commandModules.push(new ButtonEditor({client: client, db: db}));
+commandModules.push(new ButtonEditor({client: client}));
 commandModules.push(new AdministrationModule({client: client, db:db}))
 
 // Non-command modules - these will not be queried for their commands

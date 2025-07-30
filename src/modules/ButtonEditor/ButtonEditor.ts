@@ -23,7 +23,7 @@ import { makeInteractionPrintable } from "../../util/MakeInteractionPrintable";
 
 
 interface ButtonEditorParams extends ModuleParams {
-  db: Database
+  //db: Database
 }
 
 
@@ -34,28 +34,14 @@ export class ButtonEditor extends SpecializedCommandModule {
   editorData: Map<string, ButtonEditorState>;
 
   // The database instance for the bot
-  db: Database;
+  //db: Database;
 
 
   constructor(params: ButtonEditorParams) {
     logDebug("Initializing ButtonEditor.")
     super(params);
     this.editorData = new Map();
-
-    // Make sure the required table exists on the db
-    this.db = params.db;
-    logDebug("Creating table buttons in the database if not exists.")
-    this.db.exec(
-      `CREATE TABLE IF NOT EXISTS buttons(
-        button_id TEXT PRIMARY KEY,
-        role TEXT NOT NULL,
-        action INTEGER NOT NULL,
-        silent INTEGER NOT NULL,
-        guild_id TEXT NOT NULL,
-        channel_id TEXT NOT NULL,
-        message_id TEXT NOT NULL
-      );`
-    );
+    //this.db = params.db;
 
     // Register the /buttoneditor command and its subcommands
     logDebug("Adding command /buttoneditor to commands list.")
@@ -190,7 +176,7 @@ export class ButtonEditor extends SpecializedCommandModule {
             break;
           case "deploy":
             logDebug("Handling /buttoneditor deploy.")
-            await deployMessage(this.editorData, interaction, this.db);
+            await deployMessage(this.editorData, interaction);
             break;
           case "clear":
             logDebug("Handling /buttoneditor clear.")
