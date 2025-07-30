@@ -20,6 +20,9 @@ import { updateBotIconIfNecessary } from "./core/UpdateBotIcon";
 import { logDebug, logError, logInfo, LogLevel, logWarn } from "./core/Log";
 import { AdministrationModule } from "./modules/Administration/Administration";
 
+
+logInfo(`Starting bot instance.`);
+
 // Load environment variables
 loadEnvVars()
 
