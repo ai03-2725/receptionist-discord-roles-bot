@@ -42,6 +42,8 @@ logDebug("Opening database")
 const db = new Database('./data/bot-data.db');
 logDebug("Database successfully opened")
 
+// TODO: Add migrations handling of some sort - log most recent into bot data?
+// this.db.exec(`DROP TABLE IF EXISTS buttons;`);
 
 // Create a new client instance
 logDebug("Creating client")
@@ -62,7 +64,7 @@ commandModules.push(new AdministrationModule({client: client, db:db}))
 // Non-command modules - these will not be queried for their commands
 logDebug("Loading modules without commands")
 const nonCommandModules: Module[] = []
-nonCommandModules.push(new ButtonHandler({client: client, db: db}))
+nonCommandModules.push(new ButtonHandler({client: client}))
 
 
 // Create a global commands list based on the commands list of each module
