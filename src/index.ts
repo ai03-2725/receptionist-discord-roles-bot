@@ -88,3 +88,16 @@ try {
   logError("Please verify that you have completed the Discord application setup and that all credentials are valid.");
   process.exit(1);
 }
+
+// Handle exits gracefully
+const shutdown = (cause: "SIGTERM" | "SIGINT" | "uncaughtException") => {
+  logInfo(`Shutting down due to reason: ${cause}`)
+  logDebug("Closing database")
+  db.close();
+  logDebug("Database closed")
+  process.exit(cause === "uncaughtException" ? 1 : 0);
+}
+process
+  .on('SIGTERM', shutdown('SIGTERM'))
+  .on('SIGINT', shutdown('SIGINT'))
+  .on('uncaughtException', shutdown('uncaughtException'));

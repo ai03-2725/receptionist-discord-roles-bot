@@ -153,8 +153,8 @@ export const deployMessage = async (editorData: EditorDataType, interaction: Cha
     logError(messageData)
     logError("Interaction details:")
     logError(makeInteractionPrintable(interaction))
-    const replySuccess = await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.")
-    replySuccess && await interactionReplySafely(interaction, `\`\`\`${JSON.stringify(error)}\`\`\``); // interactionReplySafely automatically switches to followUp as necessary
+    const replySuccess = await interactionReplySafely(interaction, "Failed to send the message. See bot log for more details.\n\nMake sure that the bot has permissions to send messages in this channel.")
+    //replySuccess && await interactionReplySafely(interaction, `\`\`\`${JSON.stringify(error)}\`\`\``); // interactionReplySafely automatically switches to followUp as necessary
     return
   }
 
