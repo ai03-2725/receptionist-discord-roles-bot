@@ -41,9 +41,9 @@ At this point, your Discord app should open, and you should be able to add the b
        container_name: receptionist
        restart: unless-stopped
        environment:
-         APPLICATION_ID: 000000000000000000
-         APP_TOKEN: ABCDABCDABCDABCDABCDABCD
-         BOT_OWNER_IDS: 000000000000000000
+         - APPLICATION_ID=000000000000000000
+         - APP_TOKEN=ABCDABCDABCDABCDABCDABCD
+         - BOT_OWNER_IDS=000000000000000000
        volumes:
          - ./data:/app/data
    networks: {}
@@ -65,6 +65,7 @@ At this point, your Discord app should open, and you should be able to add the b
 
 1. The bot should create a `Receptionist` role within your guild.  
    Move this higher than any role it should be able to assign/remove.
+1. Give the `Receptionist` role permissions to read/write to all channels.
 1. While the invite URL should have assigned the bot the correct permissions, please make sure the following permissions are enabled for the `Receptionist` role:
   1. `Manage roles`: To be able to assign/remove roles.
   1. `Send Messages and Create Posts`: To be able to send role assignment messages with buttons.

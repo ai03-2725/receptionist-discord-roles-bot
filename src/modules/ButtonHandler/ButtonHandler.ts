@@ -77,6 +77,12 @@ export class ButtonHandler extends Module {
         return
       }
 
+      // Make sure guild is available before interacting with it
+      if (!interaction.guild.available) {
+        await interactionReplySafely(interaction, "Guild is currently unavailable - please try again later.");
+        return;
+      }
+
       // Find the role to assign
       const roleToAssign = interaction.guild.roles.resolve(buttonData.role)
       if (!roleToAssign) {

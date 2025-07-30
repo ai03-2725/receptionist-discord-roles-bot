@@ -27,7 +27,12 @@ export const addButton = async (editorData: EditorDataType, interaction: ChatInp
 
   // If an emote is provided, verify that it's a valid emoji
   if (emote) {
-    const validEmote = await checkIfValidEmoji(emote, interaction.guild!) // Guild should always exist since the command /buttoneditor is limited to guild text channels
+    // Make sure that the guild is available before trying to query emotes in it
+    if (!interaction.guild || !interaction.guild.available) {
+      await interactionReplySafely(interaction, "Guild was inaccessible for looking up emotes. Please try again later.");
+      return;
+    }
+    const validEmote = await checkIfValidEmoji(emote, interaction.guild)
     if (!validEmote) {
       logDebug(`Cancelled button add - invalid emote ${emote}.`)
       await interactionReplySafely(interaction, `Emote "\`${emote}\`" doesn't seem to be a valid emoji within this guild/server.`)
