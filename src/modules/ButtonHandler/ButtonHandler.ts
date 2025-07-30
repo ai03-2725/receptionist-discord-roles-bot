@@ -33,9 +33,12 @@ export class ButtonHandler extends Module {
         return
       }
 
+      logDebug(`Detected button press with ID '${interaction.customId}'.`)
+
       // Check if the button is a role assign button
       const parsedButton = decodeCustomIdToRoleButton(interaction.customId)
       if (!parsedButton) {
+        logDebug(`Button parse failed; skipping.`)
         return
       }
 
@@ -78,7 +81,7 @@ export class ButtonHandler extends Module {
 
       // Check if user already has the role in question
       // Make sure the user is cached to access their roles beforehand
-      await member.fetch()
+      //await member.fetch()
       const memberAlreadyHasRole = member.roles.cache.some(role => role.id === roleToAssign.id)
       logDebug(memberAlreadyHasRole ? `User already has specified role - using to switch behavior.` : `User currently doesn't have specified role.`)
 

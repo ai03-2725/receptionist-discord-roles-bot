@@ -22,6 +22,8 @@
 //     - 1 char - Separator (':')
 //     - Rest - Target role ID
 
+import { logDebug } from "../core/Log"
+
 
 // Encoded custom ID prefixes - single char uppercase
 enum EncodedCustomIdPrefixes {
@@ -35,19 +37,24 @@ export enum PublicInteractionCategory {
 }
 
 const parseCustomIdPrefix: (id: string) => null | {prefix: EncodedCustomIdPrefixes, idRest: string[]} = (id) => {
+
+  logDebug("Parsing custom ID prefix")
   // Encoded IDs are separated by colons
   const parts = id.split(':')
+  logDebug(parts)
   // Check if the first group is a valid identifier - a single-char string included in EncodedCustomIdPrefixes
   if (
     parts[0] && 
     parts[0].length === 1 && 
     Object.values<string>(EncodedCustomIdPrefixes).includes(parts[0])
   ) {
+    logDebug("Parse success")
     return {
-      prefix: EncodedCustomIdPrefixes[parts[0]],
+      prefix: parts[0] as EncodedCustomIdPrefixes,
       idRest: parts.slice(1)
     }
   } else {
+    logDebug("Parse fail")
     return null
   }
 }
@@ -57,17 +64,22 @@ const parseCustomIdPrefix: (id: string) => null | {prefix: EncodedCustomIdPrefix
 // Otherwise returns the PublicInteractionCategory corresponding to the interaction
 export const parseCustomIdPublicInteractionType: (id: string) => null | {interactionType: PublicInteractionCategory, idRest: string[]} = (id) => {
   const customIdDetails = parseCustomIdPrefix(id)
+  console.log(customIdDetails)
   if (!customIdDetails || customIdDetails.prefix !== EncodedCustomIdPrefixes.Public) return null
+  logDebug("Parsing public interaction type")
+  logDebug(customIdDetails.idRest)
   if (
-    customIdDetails.idRest[1] && 
-    customIdDetails.idRest[1].length === 1 && 
-    Object.values<string>(PublicInteractionCategory).includes(customIdDetails.idRest[1])
+    customIdDetails.idRest[0] && 
+    customIdDetails.idRest[0].length === 1 && 
+    Object.values<string>(PublicInteractionCategory).includes(customIdDetails.idRest[0])
   ) {
+    logDebug("Parse success")
     return {
-      interactionType: PublicInteractionCategory[customIdDetails.idRest[1]],
+      interactionType: customIdDetails.idRest[0] as PublicInteractionCategory,
       idRest: customIdDetails.idRest.slice(1)
     }
   } else {
+    logDebug("Parse fail")
     return null
   }
 }

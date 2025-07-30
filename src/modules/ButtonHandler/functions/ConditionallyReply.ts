@@ -13,6 +13,11 @@ export const ConditionallyReply = async (interaction: ButtonInteraction<CacheTyp
       textDisplay => textDisplay
         .setContent(message)
     )
-    await interactionReplySafelyComponents(interaction, [replyContainer])
+    const success = await interactionReplySafelyComponents(interaction, [replyContainer])
+    if (success) {
+      setTimeout(() => {
+        interaction.deleteReply()
+      }, 5000)
+    }
   }
 }

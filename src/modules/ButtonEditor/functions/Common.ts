@@ -75,7 +75,7 @@ type RoleButtonIdDataBlockContents = {
 
 // Decodes the third block of the role button custom IDs for encoding revision 00
 const parseRoleButtonIdDataBlock: (dataBlock: string) => null | RoleButtonIdDataBlockContents = (dataBlock) => {
-  let dataBlockParsed: RoleButtonIdDataBlockContents;
+
   const revision = dataBlock.slice(0, 2)
   switch(revision) {
     case "00": 
@@ -88,16 +88,14 @@ const parseRoleButtonIdDataBlock: (dataBlock: string) => null | RoleButtonIdData
         logWarn(`Data block: ${dataBlock}`);
         return null
       }
-      dataBlockParsed.deduplicationId = Number(dedupId)
 
       // Char 4 = Action type (assign/remove/toggle)
       const actionType = dataBlock.slice(4, 5)
-      if (!(Object.values(ButtonActionMappings).includes(actionType))) {
+      if (!(Object.values(ButtonActionMappings).includes(Number(actionType)))) {
         logWarn(`A role-button-encoded custom ID was misformatted - unknown action ID '${actionType}'`);
         logWarn(`Data block: ${dataBlock}`);
         return null
       }
-      dataBlockParsed.actionType = ButtonActionMappings[actionType]
 
       // Char 5 = Silentness (Y/N)
       const silent = dataBlock.slice(5, 6)
@@ -106,10 +104,13 @@ const parseRoleButtonIdDataBlock: (dataBlock: string) => null | RoleButtonIdData
         logWarn(`Data block: ${dataBlock}`);
         return null
       }
-      dataBlockParsed.silent = (silent === "Y") ? true : false
 
       // Parsing complete
-      break;
+      return {
+        deduplicationId: Number(dedupId),
+        actionType: Number(actionType) as ButtonActionMappings,
+        silent: silent === "Y" ? true : false
+      }
     default:
       // Unknown revision
       logWarn(`A role-button-encoded custom ID was misformatted - Unknown revision ID '${revision}'`);
@@ -117,14 +118,16 @@ const parseRoleButtonIdDataBlock: (dataBlock: string) => null | RoleButtonIdData
       return null;
   }
 
-  return dataBlockParsed
 }
 
 // Decode a button's custom ID to button action details
 // Returns null if provided ID is not an encoded button
 export const decodeCustomIdToRoleButton: (id: string) => null | {buttonData: RoleButtonIdDataBlockContents, roleId: string} = (id) => {
   const buttonData = parseCustomIdPublicInteractionType(id);
-  if (buttonData === null || buttonData.interactionType !== PublicInteractionCategory.RoleAssignButton) return null;
+  if (buttonData === null || buttonData.interactionType !== PublicInteractionCategory.RoleAssignButton) {
+    logDebug(buttonData)
+    return null;
+  }
   // Now we know that buttonData.idRest should be button data
   // Length of the rest of the ID (after the interaction category) should be 2 - the action specifics data block and the role ID
   if (buttonData.idRest.length !== 2) {

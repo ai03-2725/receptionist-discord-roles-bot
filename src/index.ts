@@ -105,4 +105,7 @@ const shutdown = (cause: "SIGTERM" | "SIGINT" | "uncaughtException") => {
 process
   .on('SIGTERM', () => shutdown('SIGTERM'))
   .on('SIGINT', () => shutdown('SIGINT'))
-  .on('uncaughtException', () => shutdown('uncaughtException'));
+  .on('uncaughtException', (e) => {
+    logError(e);
+    shutdown('uncaughtException')
+  });

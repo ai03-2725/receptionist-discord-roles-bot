@@ -41,6 +41,7 @@ const buildMessage = (editorData: EditorDataType, userId: string) => {
       if (!customId) {
         throw new Error("Custom ID failed to generate.") //TODO: Handle more gracefully
       }
+      logDebug(`Adding button with ID ${customId}`)
       buttonBuilder.setCustomId(customId)
       // Add this button to the current action row
       currentActionRow.addComponents(buttonBuilder)
