@@ -33,14 +33,14 @@ createBotDataDirIfNecessary()
 let botData = loadBotDataJson();
 
 // Check if sqlite DBs exist, warning the user if they don't
-if (!existsSync('./data/bot-data.db')) {
-  logWarn("Did not find a ./data/bot-data.db database file - creating one now.")
-  logWarn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.db is being retained properly.")
-}
+// if (!existsSync('./data/bot-data.db')) {
+//   logWarn("Did not find a ./data/bot-data.db database file - creating one now.")
+//   logWarn("If you are seeing this message at times that aren't a first boot or after a data reset, please make sure that ./data/bot-data.db is being retained properly.")
+// }
 // Connect to sqlite dbs, creating them if not existent already
-logDebug("Opening database")
-const db = new Database('./data/bot-data.db');
-logDebug("Database successfully opened")
+// logDebug("Opening database")
+// const db = new Database('./data/bot-data.db');
+// logDebug("Database successfully opened")
 
 // TODO: Add migrations handling of some sort - log most recent into bot data?
 // this.db.exec(`DROP TABLE IF EXISTS buttons;`);
@@ -59,7 +59,7 @@ logDebug("Loading modules with commands")
 const commandModules: CommandModule[] = []
 commandModules.push(new PingHandler({client: client}));
 commandModules.push(new ButtonEditor({client: client}));
-commandModules.push(new AdministrationModule({client: client, db:db}))
+//commandModules.push(new AdministrationModule({client: client}))
 
 // Non-command modules - these will not be queried for their commands
 logDebug("Loading modules without commands")
@@ -97,9 +97,9 @@ try {
 // Handle exits gracefully
 const shutdown = (cause: "SIGTERM" | "SIGINT" | "uncaughtException") => {
   logInfo(`Shutting down due to reason: ${cause}`)
-  logDebug("Closing database")
-  db.close();
-  logDebug("Database closed")
+  // logDebug("Closing database")
+  // db.close();
+  // logDebug("Database closed")
   process.exit(cause === "uncaughtException" ? 1 : 0);
 }
 process
